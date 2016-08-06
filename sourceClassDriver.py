@@ -23,8 +23,6 @@ alert_type = 'None'
 if streamdata['alert_type']:
     alert_type = streamdata['alert_type']
 
-#time = int( os.popen('lalapps_tconvert').read() )
-
 #if alert_type == 'new':
     # The object is a serialized event. Get the FAR
 
@@ -87,18 +85,6 @@ message = 'Computed from detection pipeline: The probability of second object be
 gdb.writeLog(graceid, message)
 gdb.writeLog(graceid, message, tagname='em_follow')
 
-
-
-#event_dict = g.event(streamdata['uid']).json()
-#mass1_1 = event_dict["extra_attributes"]["SingleInspiral"][0]["mass1"]
-#mass1_2 = event_dict["extra_attributes"]["SingleInspiral"][1]["mass1"]
-
-#mass2_1 = event_dict["extra_attributes"]["SingleInspiral"][0]["mass2"]
-#mass2_2 = event_dict["extra_attributes"]["SingleInspiral"][1]["mass2"]
-
-#File = open('masses_record_' + str(streamdata['uid']) + '_.dat', 'w')
-
-#File.writelines(str(streamdata['uid']) + '\t' + str(mass1_1) + '\t' + str(mass1_2) + '\t' + str(mass2_1) + '\t' + str(mass2_2) + '\n')
 
 
 
