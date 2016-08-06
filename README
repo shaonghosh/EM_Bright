@@ -1,0 +1,18 @@
+
+
+*** If you have any questions please email me (Shaon Ghosh) s.ghosh@astro.ru.nl ***
+
+
+
+
+*** Subscribe to the cbc_gstlal node ***
+lvalert_admin -a <user.name> -b <your password> --subscribe --node cbc_gstlal
+
+*** Start listening ***
+lvalert_listen -a <user.name> -b <your password> -c /home/shaon/analysis/o2/EM_Bright_classification/auto_EM_Bright/myLVAlertListen.ini -r alertInstance & 
+
+
+Important: Need PyCBC installation 
+
+
+
