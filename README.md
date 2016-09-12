@@ -5,10 +5,14 @@ Run >> python initiate.py --user user.name --password <ligo.org password>
 to create the LV alert ini file and start the jobs.
 
 *** Subscribe to the cbc_gstlal node ***
-lvalert_admin -a <user.name> -b <your password> --subscribe --node cbc_gstlal
+lvalert_admin --user <user.name> --password <your password> --subscribe --node cbc_gstlal
 
 *** Start listening ***
-lvalert_listen -a <user.name> -b <your password> -c /home/shaon/analysis/o2/EM_Bright_classification/auto_EM_Bright/myLVAlertListen.ini -r alertInstance & 
+lvalert_listen --user <user.name> --password <your password> -c /home/shaon/analysis/o2/EM_Bright_classification/auto_EM_Bright/myLVAlertListen.ini -r alertInstance & 
 
 
-Important: Need PyCBC installation 
+Notes: 
+
+Need PyCBC installation 
+
+Make sure your lalsuite installation is later than 23rd June.
