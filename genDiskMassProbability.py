@@ -30,9 +30,9 @@ class genDiskMass:
         data = np.recfromtxt(self.inputFile, names=True, skip_header=skipHeader)
         burnin = 0
         if burn: burnin = burn
-        mc = data['mc'][burn:]
-        massRatio = data['q'][burn:]
-        self.chi = data['a1'][burn:]
+        mc = data['mc'][burnin:]
+        massRatio = data['q'][burnin:]
+        self.chi = data['a1'][burnin:]
         self.eta = massRatio/((1 + massRatio)**2)
         self.mPrimary = (massRatio**(-0.6)) * mc * (1. + massRatio)**0.2
         self.mSecondary = (massRatio**0.4) * mc * (1. + massRatio)**0.2
