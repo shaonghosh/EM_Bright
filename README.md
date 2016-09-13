@@ -10,7 +10,6 @@ lvalert_admin --user <user.name> --password <your password> --subscribe --node c
 *** Start listening ***
 lvalert_listen --user <user.name> --password <your password> -c /home/shaon/analysis/o2/EM_Bright_classification/auto_EM_Bright/myLVAlertListen.ini -r alertInstance & 
 
-
 Notes: 
 
 Need PyCBC installation 
