@@ -82,7 +82,7 @@ os.system('mkdir -p ' + psd_path)
 os.system('mkdir -p ' + source_class_path)
 
 x = 1
-###CHECK! This can cause an infinite loop. Discuss this with the reviewers
+### WARNING! This can cause an infinite loop. Discuss this with the reviewers
 while x == 1:
     x = getCoinc(graceid, coinc_path, psd_path)
 
