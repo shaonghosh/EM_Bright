@@ -88,8 +88,8 @@ while x == 1:
 
 ### Check if this event  has been analyzed ###
 if os.path.isfile(source_class_path + '/Source_Classification_' + graceid + '_.dat'):
-        print 'Event already analyzed... skipping'
-        exit(0)
+    print 'Event already analyzed... skipping'
+    exit(0)
 
 
 ### Check if the required coinc file and the psd file is present ###
