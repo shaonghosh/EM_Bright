@@ -87,12 +87,12 @@ if streamdata['alert_type']:
 
 if alert_type == 'new':
     graceid = str(streamdata['uid'])
-    try: 
+    try:
         os.system('mkdir -p ' + log_path)
     except:
         print 'Could not create logs directory...'
         exit(1)
-    log = open(log_path + '/log.' + graceid + 'txt', 'a')
+    log = open(log_path + '/log_' + graceid + '.txt', 'a')
     log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
     #coinc_path = 'all_coincs' ### Currently hardcoded
     #psd_path = 'all_psds' ### Currently hardcoded
@@ -103,14 +103,14 @@ if alert_type == 'new':
 
         os.system('mkdir -p ' + psd_path)
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created psd directory\n')
-    
+
         os.system('mkdir -p ' + source_class_path)
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created results directory\n')
 
     except:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Failed to creat coinc and/or psd and/or results directory, Check write privilege to the given path\n')
         exit(1)
-    
+
 
     x = 1
     ### WARNING! This can cause an infinite loop. Discuss this with the reviewers: FIXED
