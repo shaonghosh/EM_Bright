@@ -98,6 +98,7 @@ if alert_type == 'new':
     ### WARNING! This can cause an infinite loop. Discuss this with the reviewers
     countTrials = 0
     while x == 1:
+        log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
         x = getCoinc(graceid, coinc_path, psd_path)
         if countTrials >= 5:
             log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
