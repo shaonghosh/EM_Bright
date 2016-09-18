@@ -64,7 +64,7 @@ configFile = 'configFile.ini'
 configParser.read(configFile)
 coinc_path = configParser.get('Paths', 'coincPath')
 psd_path = configParser.get('Paths', 'psdPath')
-results_path = configParser.get('Paths', 'results')
+source_class_path = configParser.get('Paths', 'results')
 log_path = configParser.get('Paths', 'logs')
 
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
