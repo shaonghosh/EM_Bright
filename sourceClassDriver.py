@@ -6,6 +6,7 @@ from sys import stdin
 from sys import exit
 import time as Time
 import datetime
+import ConfigParser
 
 import ligo.gracedb.rest
 from pylal import SnglInspiralUtils
@@ -56,6 +57,19 @@ def readCoinc(CoincFile):
 
 
 #########################################################################################
+
+### Reading information from config file ###
+configParser = ConfigParser.ConfigParser()
+configFile = 'configFile.ini'
+configParser.read(configFile)
+coinc_path = configParser.get('Paths', 'coincPath')
+psd_path = configParser.get('Paths', 'psdPath')
+results_path = configParser.get('Paths', 'results')
+log_path = configParser.get('Paths', 'logs')
+
+ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
+diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
+
 '''
 Receives alerts from graceDB, obtains the required coinc and psd files and then launches
 the EM-Bright classification jobs.
@@ -71,14 +85,18 @@ alert_type = 'None'
 if streamdata['alert_type']:
     alert_type = streamdata['alert_type']
 
-print alert_type
 if alert_type == 'new':
-    log = open('logFile.txt', 'a')
     graceid = str(streamdata['uid'])
+    try: 
+        os.system('mkdir -p ' + log_path)
+    except:
+        print 'Could not create logs directory...'
+        exit(1)
+    log = open(log_path + '/log.' + graceid + 'txt', 'a')
     log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
-    coinc_path = 'all_coincs' ### Currently hardcoded
-    psd_path = 'all_psds' ### Currently hardcoded
-    source_class_path = 'all_source_classifications' ### Currently hardcoded
+    #coinc_path = 'all_coincs' ### Currently hardcoded
+    #psd_path = 'all_psds' ### Currently hardcoded
+    #source_class_path = 'all_source_classifications' ### Currently hardcoded
     try:
         os.system('mkdir -p ' + coinc_path)
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created coinc directory\n')
@@ -95,7 +113,7 @@ if alert_type == 'new':
     
 
     x = 1
-    ### WARNING! This can cause an infinite loop. Discuss this with the reviewers
+    ### WARNING! This can cause an infinite loop. Discuss this with the reviewers: FIXED
     countTrials = 0
     while x == 1:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
