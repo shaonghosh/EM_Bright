@@ -76,6 +76,7 @@ if streamdata['alert_type']:
 
 log = open('logFile.txt', 'a')
 graceid = str(streamdata['uid'])
+log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
 coinc_path = 'all_coincs' ### Currently hardcoded
 psd_path = 'all_psds' ### Currently hardcoded
 source_class_path = 'all_source_classifications' ### Currently hardcoded
@@ -105,8 +106,8 @@ while x == 1:
     if x == 1: Time.sleep(5) ### Wait for five seconds if getCoinc is unsuccessful
     countTrials += 1
 
-log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files')
-    
+log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
+
 
 ### Check if this event  has been analyzed ###
 if os.path.isfile(source_class_path + '/Source_Classification_' + graceid + '_.dat'):
