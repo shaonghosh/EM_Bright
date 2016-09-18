@@ -132,6 +132,7 @@ if alert_type == 'new':
     File.close()
 
     samples_sngl = getSamples(graceid, mass1, mass2, chi1, 1000, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, saveData=True)
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
     if ~np.any( np.isnan(samples_sngl[0]) ):
         diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', 0.03)
         [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
@@ -143,7 +144,7 @@ if alert_type == 'new':
         [NS_prob_2_sngl, em_bright_prob_sngl] = [0., 0.]
 
     end = Time.time()
-    log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing probabilities = ' + str(end - start) + '\n')
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
 
     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
     source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '\n')
