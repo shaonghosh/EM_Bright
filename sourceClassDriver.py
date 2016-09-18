@@ -5,6 +5,7 @@ import numpy as np
 from sys import stdin
 from sys import exit
 import time as Time
+import datetime
 
 import ligo.gracedb.rest
 from pylal import SnglInspiralUtils
@@ -73,22 +74,43 @@ if streamdata['alert_type']:
 #if alert_type == 'new':
     # The object is a serialized event. Get the FAR
 
+log = open('logFile.txt', 'a')
 graceid = str(streamdata['uid'])
 coinc_path = 'all_coincs' ### Currently hardcoded
 psd_path = 'all_psds' ### Currently hardcoded
 source_class_path = 'all_source_classifications' ### Currently hardcoded
-os.system('mkdir -p ' + coinc_path)
-os.system('mkdir -p ' + psd_path)
-os.system('mkdir -p ' + source_class_path)
+try:
+    os.system('mkdir -p ' + coinc_path)
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created coinc directory\n')
+
+    os.system('mkdir -p ' + psd_path)
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created psd directory\n')
+    
+    os.system('mkdir -p ' + source_class_path)
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created results directory\n')
+
+except:
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Failed to creat coinc and/or psd and/or results directory, Check write privilege to the given path\n')
+    exit(1)
+    
 
 x = 1
 ### WARNING! This can cause an infinite loop. Discuss this with the reviewers
+countTrials = 0
 while x == 1:
     x = getCoinc(graceid, coinc_path, psd_path)
+    if countTrials >= 5:
+        log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
+        exit(1)
+    if x == 1: Time.sleep(5) ### Wait for five seconds if getCoinc is unsuccessful
+    countTrials += 1
+
+log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files')
+    
 
 ### Check if this event  has been analyzed ###
 if os.path.isfile(source_class_path + '/Source_Classification_' + graceid + '_.dat'):
-    print 'Event already analyzed... skipping'
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Event already analyzed... skipping\n')
     exit(0)
 
 
@@ -116,10 +138,11 @@ if ~np.any( np.isnan(samples_sngl[0]) ):
 
 else:
     print 'Return was NaNs'
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Return was NaNs\n')
     [NS_prob_2_sngl, em_bright_prob_sngl] = [0., 0.]
 
 end = Time.time()
-print '*** Time taken in computing probabilities = ' + str(end - start)
+log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing probabilities = ' + str(end - start) + '\n')
 
 source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
 source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '\n')
