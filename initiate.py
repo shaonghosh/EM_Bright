@@ -4,6 +4,7 @@ import optparse
 
 parser = optparse.OptionParser()
 parser.add_option("-U", "--user", action="store", type="string", metavar="NAME", help="username albert.einstein")
+### This will be removed for the new LVAlert ###
 parser.add_option("-P", "--password", action="store", type="string", metavar="NAME", help="lv alert password")
 
 (opts,args) = parser.parse_args()
