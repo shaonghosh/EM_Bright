@@ -51,8 +51,8 @@ def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, saveData=Fals
     fit_cntr = match_cntr # Do the effective Fisher fit with pts above this match
     Nrandpts = samples # Requested number of pts to put inside the ellipsoid
 
-    template_min_freq = 40.
-    ip_min_freq = 40.
+    template_min_freq = 30. ### This needs to be discussed
+    ip_min_freq = 30. ### This needs to be discussed
     lambda1, lambda2 = 0, 0
 
     #
