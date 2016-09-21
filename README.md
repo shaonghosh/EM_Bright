@@ -15,3 +15,11 @@ Notes:
 Need PyCBC installation 
 
 Make sure your lalsuite installation is later than 23rd June.
+
+
+Sample run command:
+
+python initiate.py --user shaon.ghosh --netrcpath /home/shaon/.netrc
+
+
+
