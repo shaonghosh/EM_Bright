@@ -67,7 +67,8 @@ def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, fmin=30, save
             m1=m1_SI, m2=m2_SI, spin1z=chi1,
             lambda1=lambda1, lambda2=lambda2,
             fmin=template_min_freq,
-            approx=lalsim.GetApproximantFromString('SpinTaylorT4')
+            approx=lalsim.GetApproximantFromString('SEOBNRv2_ROM')
+            #approx=lalsim.GetApproximantFromString('SpinTaylorT4')
             )
 
     # Find a deltaF sufficient for entire range to be explored
