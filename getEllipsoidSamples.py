@@ -158,7 +158,7 @@ def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, saveData=Fals
     evals = np.array([-1, -1, -1])
     count = 0
     start = time.time()
-    match_cntrs = np.array([0.9, 0.99, 0.999])
+    match_cntrs = np.array([0.97, 0.99, 0.999])
     while np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
         if count>0: print 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count])
         wide_match = 1 - (1 - match_cntrs[count])**(2/3.0)
