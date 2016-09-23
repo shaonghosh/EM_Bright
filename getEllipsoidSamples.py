@@ -36,7 +36,7 @@ samples = getSamples(1135654616, 10.0, 1.4, -0.5, 1000, {'H1=../psds_2016.xml.gz
 
 
 
-def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, saveData=False, plot=False, path=False, show=False):
+def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, fmin=30, saveData=False, plot=False, path=False, show=False):
     m1_SI = mass1 * lal.MSUN_SI
     m2_SI = mass2 * lal.MSUN_SI
     min_mc_factor, max_mc_factor = 0.9, 1.1
@@ -51,8 +51,8 @@ def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, saveData=Fals
     fit_cntr = match_cntr # Do the effective Fisher fit with pts above this match
     Nrandpts = samples # Requested number of pts to put inside the ellipsoid
 
-    template_min_freq = 30. ### This needs to be discussed
-    ip_min_freq = 30. ### This needs to be discussed
+    template_min_freq = fmin ### This needs to be discussed
+    ip_min_freq = fmin ### This needs to be discussed
     lambda1, lambda2 = 0, 0
 
     #
