@@ -104,11 +104,13 @@ def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, fmin=30, save
             psd_f_high = len(psd.data.data)*psd.deltaF
             f = np.arange(0, psd_f_high, psd.deltaF)
             fvals = np.arange(0, psd_f_high, PSIG.deltaF)
+            
+            ## Richard: try np.interp(fvals, f, psd.data.data) as code
 
             def anon_interp(newf):
-#                return np.interp(newf, f, psd.data) ## CHECK: This for old series in pylal
                 return np.interp(newf, f, psd.data.data)
-            eff_fisher_psd = np.array(map(anon_interp, fvals))
+            #eff_fisher_psd = np.array(map(anon_interp, fvals))
+            eff_fisher_psd = np.interp(fvals, f, psd.data.data) ## CHECK
 
     analyticPSD_Q = False
 
