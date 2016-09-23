@@ -69,8 +69,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
             m1=m1_SI, m2=m2_SI, spin1z=chi1,
             lambda1=lambda1, lambda2=lambda2,
             fmin=template_min_freq,
-            approx=lalsim.GetApproximantFromString('SEOBNRv2_ROM')
-            #approx=lalsim.GetApproximantFromString('SpinTaylorT4')
+            approx=lalsim.GetApproximantFromString('SpinTaylorT4')
             )
 
     # Find a deltaF sufficient for entire range to be explored
@@ -188,6 +187,9 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     r1 = np.sqrt(2.*(1.-match_cntr)/np.real(evals[0])) # ellipse radii ...
     r2 = np.sqrt(2.*(1.-match_cntr)/np.real(evals[1])) # ... along eigen-directions
     r3 = np.sqrt(2.*(1.-match_cntr)/np.real(evals[2])) # ... along eigen-directions
+### CHECK ### Should we not use the updated match_cntr value? This seems to be a bug ###
+
+
 
     NN = 0
     NN_total = 0
@@ -204,24 +206,34 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
         x1 = r1 * rrt * sinth * np.cos(ph)
         x2 = r2 * rrt * sinth * np.sin(ph)
         x3 = r3 * rrt * costh
-        rand_Mc = x1 * lal.MSUN_SI + McSIG # Mc (kg)
-        rand_eta = x2 + etaSIG # eta
-        rand_chi = x3 + chiSIG
+
+        ### CHECK ####
+        cart_grid_point = [x1, x2, x3]
+        sph_grid_point = [rrt, th, ph]
+        cart_grid_point = np.array(np.real( np.dot(rot, cart_grid_point)) )
+	print cart_grid_point
+        
+        rand_Mc = cart_grid_point[0] * lal.MSUN_SI + McSIG # Mc (kg)
+        rand_eta = cart_grid_point[1] + etaSIG # eta
+        rand_chi = cart_grid_point[2] + chiSIG
+        ### CHECK ####
+
         condition1 = rand_eta > 0
         condition2 = rand_eta <= 0.25
         condition3 = np.abs(rand_chi) < 1.0
         joint_condition = condition1 * condition2 * condition3
         if joint_condition:
-            cart_grid.append([x1, x2, x3])
-            sph_grid.append([rrt, th, ph])
+            cart_grid.append( [cart_grid_point[0], cart_grid_point[1], cart_grid_point[2]] ) ## CHECK
+            sph_grid.append([rrt, th, ph]) ### CHECK! Do we need this?
             NN += 1
     cart_grid = np.array(cart_grid)
     sph_grid = np.array(sph_grid)
     print 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid'
 
     # Rotate to get coordinates in parameter basis
-    cart_grid = np.array([ np.real( np.dot(rot, cart_grid[i]))
-        for i in xrange(len(cart_grid)) ])
+    ### CHECK! No need to rotate again ###
+#     cart_grid = np.array([ np.real( np.dot(rot, cart_grid[i]))
+#         for i in xrange(len(cart_grid)) ])
     # Put in convenient units,
     # change from parameter differential (i.e. dtheta)
     # to absolute parameter value (i.e. theta = theta_true + dtheta)
@@ -303,6 +315,7 @@ def adapt_failure():
     outgrid = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
     np.savetxt('intrinsic_grid_Failed.dat', outgrid, newline="\t")
     return np.array([np.nan, np.nan, np.nan])
+
 
 
 
