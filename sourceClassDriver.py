@@ -146,7 +146,7 @@ if alert_type == 'new':
 
 
     File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
-    File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\n')
+    File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
 
     File.close()
 
