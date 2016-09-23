@@ -52,7 +52,8 @@ def readCoinc(CoincFile):
         mass2 = coinc_row.mass2
         chi1 = coinc_row.spin1z
         time = coinc_row.end_time
-    return [mass1, mass2, chi1, time]
+        snr = coinc_row.snr
+    return [mass1, mass2, chi1, time, snr]
 
 
 
@@ -114,7 +115,6 @@ if alert_type == 'new':
 
 
     x = 1
-    ### WARNING! This can cause an infinite loop. Discuss this with the reviewers: FIXED
     countTrials = 0
     while x == 1:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
@@ -138,7 +138,7 @@ if alert_type == 'new':
     if os.path.isfile(coinc_path + '/coinc_' + graceid + '.xml') and os.path.isfile(psd_path + '/psd_' + graceid + '.xml.gz'):
         start = Time.time()
         coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
-        [mass1, mass2, chi1, time] = readCoinc(coincFileName)
+        [mass1, mass2, chi1, time, snr] = readCoinc(coincFileName)
 
     else:
         print 'Did not find the coinc and psd files... quitting...'
@@ -150,7 +150,7 @@ if alert_type == 'new':
 
     File.close()
 
-    samples_sngl = getSamples(graceid, mass1, mass2, chi1, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, saveData=True)
+    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
     if ~np.any( np.isnan(samples_sngl[0]) ):
         diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', diskMassThreshold)
