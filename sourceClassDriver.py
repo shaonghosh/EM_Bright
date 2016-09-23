@@ -69,7 +69,7 @@ log_path = configParser.get('Paths', 'logs')
 
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
 diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
-fmin = float( configParser.get('EMBright', 'fmin') )
+f_low = float( configParser.get('EMBright', 'fmin') )
 
 '''
 Receives alerts from graceDB, obtains the required coinc and psd files and then launches
@@ -150,7 +150,7 @@ if alert_type == 'new':
 
     File.close()
 
-    samples_sngl = getSamples(graceid, mass1, mass2, chi1, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, saveData=True)
+    samples_sngl = getSamples(graceid, mass1, mass2, chi1, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=flow, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
     if ~np.any( np.isnan(samples_sngl[0]) ):
         diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', diskMassThreshold)
