@@ -36,7 +36,7 @@ samples = getSamples(1135654616, 10.0, 1.4, -0.5, 1000, {'H1=../psds_2016.xml.gz
 
 
 
-def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, fmin=30, saveData=False, plot=False, path=False, show=False):
+def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, saveData=False, plot=False, path=False, show=False):
     m1_SI = mass1 * lal.MSUN_SI
     m2_SI = mass2 * lal.MSUN_SI
     min_mc_factor, max_mc_factor = 0.9, 1.1
@@ -46,7 +46,8 @@ def getSamples(graceid, mass1, mass2, chi1, samples, h_PSD, l_PSD, fmin=30, save
     NMcs = 5
     NEtas = 5
     NChis = 5
-    match_cntr = 0.9 # Fill an ellipsoid of match = 0.9
+    # match_cntr = 0.9 # Fill an ellipsoid of match = 0.9
+    match_cntr = np.min([np.max([0.9, 1 - 9.2/2/network_snr**2]), bank_min_match]) ## Richard's suggestion
     wide_match = 1 - (1 - match_cntr)**(2/3.0)
     fit_cntr = match_cntr # Do the effective Fisher fit with pts above this match
     Nrandpts = samples # Requested number of pts to put inside the ellipsoid
