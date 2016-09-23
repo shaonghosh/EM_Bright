@@ -47,6 +47,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     NEtas = 5
     NChis = 5
     # match_cntr = 0.9 # Fill an ellipsoid of match = 0.9
+    bank_min_match = 0.97
     match_cntr = np.min([np.max([0.9, 1 - 9.2/2/network_snr**2]), bank_min_match]) ## Richard's suggestion
     wide_match = 1 - (1 - match_cntr)**(2/3.0)
     fit_cntr = match_cntr # Do the effective Fisher fit with pts above this match
