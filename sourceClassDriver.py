@@ -69,6 +69,7 @@ log_path = configParser.get('Paths', 'logs')
 
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
 diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
+fmin = float( configParser.get('EMBright', 'fmin') )
 
 '''
 Receives alerts from graceDB, obtains the required coinc and psd files and then launches
