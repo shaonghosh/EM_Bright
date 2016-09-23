@@ -162,7 +162,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     evals = np.array([-1, -1, -1])
     count = 0
     start = time.time()
-    match_cntrs = np.array([0.97, 0.99, 0.999])
+    match_cntrs = np.array([0.97, 0.98, 0.99])
     while np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
         if count>0: print 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count])
         wide_match = 1 - (1 - match_cntrs[count])**(2/3.0)
@@ -211,8 +211,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
         cart_grid_point = [x1, x2, x3]
         sph_grid_point = [rrt, th, ph]
         cart_grid_point = np.array(np.real( np.dot(rot, cart_grid_point)) )
-	print cart_grid_point
-        
+
         rand_Mc = cart_grid_point[0] * lal.MSUN_SI + McSIG # Mc (kg)
         rand_eta = cart_grid_point[1] + etaSIG # eta
         rand_chi = cart_grid_point[2] + chiSIG
