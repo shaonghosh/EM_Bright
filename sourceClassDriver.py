@@ -55,7 +55,7 @@ def readCoinc(CoincFile):
     snr2 = coinc.get_column('snr')[1]
     snr = np.max([snr1, snr2]) ## Only returning the largest snr
 
-    return [mass1, mass2, chi1, time, snr]
+    return [float(mass1), float(mass2), float(chi1), int(time), float(snr)]
 
 
 
