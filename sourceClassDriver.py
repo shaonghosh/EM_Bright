@@ -47,12 +47,14 @@ def readCoinc(CoincFile):
     Reads the coinc file and returns the masses, chi1 and gps times as a list.
     '''
     coinc = SnglInspiralUtils.ReadSnglInspiralFromFiles(CoincFile)
-    for coinc_index, coinc_row in enumerate(coinc):
-        mass1 = coinc_row.mass1
-        mass2 = coinc_row.mass2
-        chi1 = coinc_row.spin1z
-        time = coinc_row.end_time
-        snr = coinc_row.snr
+    mass1 = coinc.get_column('mass1')[0]
+    mass2 = coinc.get_column('mass2')[0]
+    chi1 = coinc.get_column('spin1z')[0]
+    time = coinc.get_column('end_time')[0]
+    snr1 = coinc.get_column('snr')[0]
+    snr2 = coinc.get_column('snr')[1]
+    snr = np.max([snr1, snr2]) ## Only returning the largest snr
+
     return [mass1, mass2, chi1, time, snr]
 
 
