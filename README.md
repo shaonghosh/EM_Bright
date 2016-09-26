@@ -19,7 +19,6 @@ Make sure your lalsuite installation is later than 23rd June.
 
 Sample run command:
 
-python initiate.py --user shaon.ghosh --netrcpath /home/shaon/.netrc
-
+lvalert_listen --user shaon.ghosh  --netrc /home/shaon/.netrc -c /home/shaon/ANALYSIS/EM_Bright/myLVAlertListen.ini  -r alertInstance &
 
 
