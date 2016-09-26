@@ -168,14 +168,13 @@ if alert_type == 'new':
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
 
     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
-    source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '\n')
-    source_classification.writelines('The probability of remnant mass in the disk in excess of ' + str(diskMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(NS_prob_2_sngl) + '\n')
+    source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
+    source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(NS_prob_2_sngl) + '% \n')
 
     source_classification.close()
 
-    message = 'Computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '\n The probability of remnant mass in the disk in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(NS_prob_2_sngl) + '\n'
+    message = 'Computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(NS_prob_2_sngl) + '% \n'
 
-    gdb.writeLog(graceid, message)
     gdb.writeLog(graceid, message, tagname='em_follow')
 
 
