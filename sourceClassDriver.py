@@ -23,6 +23,9 @@ def getCoinc(graceid, coinc_path, psd_path):
     Returns zero if the fetching is successful.
     Returns one upon failure.
     '''
+    ### Reed: "reading in an environmental variable here seems fine, but also overkill. 
+    ### I don't see where this variable is set in initiate.py, so this could be fragile. 
+    ### I'd suggest specifying it as a keyword argument instead." - Clarify this from Reed.
     gracedb = ligo.gracedb.rest.GraceDb(os.environ.get('GRACEDB_SERVICE_URL', ligo.gracedb.rest.DEFAULT_SERVICE_URL))
 
     try:
@@ -98,9 +101,6 @@ if alert_type == 'new':
         exit(1)
     log = open(log_path + '/log_' + graceid + '.txt', 'a')
     log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
-    #coinc_path = 'all_coincs' ### Currently hardcoded
-    #psd_path = 'all_psds' ### Currently hardcoded
-    #source_class_path = 'all_source_classifications' ### Currently hardcoded
     try:
         os.system('mkdir -p ' + coinc_path)
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created coinc directory\n')
@@ -130,22 +130,16 @@ if alert_type == 'new':
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
 
 
-    ### Check if this event  has been analyzed ###
+    ### Check if this event  has been analyzed ### 
+    ### This is not required anymoure since I am now only analyzing new events. Remove this ###
     if os.path.isfile(source_class_path + '/Source_Classification_' + graceid + '_.dat'):
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Event already analyzed... skipping\n')
         exit(0)
 
 
-    ### Check if the required coinc file and the psd file is present ###
-    if os.path.isfile(coinc_path + '/coinc_' + graceid + '.xml') and os.path.isfile(psd_path + '/psd_' + graceid + '.xml.gz'):
-        start = Time.time()
-        coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
-        [mass1, mass2, chi1, time, snr] = readCoinc(coincFileName)
-
-    else:
-        print 'Did not find the coinc and psd files... quitting...'
-        exit(1)
-
+    start = Time.time()
+    coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
+    [mass1, mass2, chi1, time, snr] = readCoinc(coincFileName)
 
     File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
     File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
@@ -154,7 +148,9 @@ if alert_type == 'new':
 
     samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
-    if ~np.any( np.isnan(samples_sngl[0]) ):
+
+    ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
+    if ~np.any( np.isnan(samples_sngl[0]) ): 
         diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', diskMassThreshold)
         [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
         em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
@@ -167,6 +163,8 @@ if alert_type == 'new':
     end = Time.time()
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
 
+    
+    ### Find an appropriate use of this file (e.g. uploading this as JSON) else get rid of it ###
     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
     source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
     source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(NS_prob_2_sngl) + '% \n')
