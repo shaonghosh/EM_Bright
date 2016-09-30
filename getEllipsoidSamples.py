@@ -165,7 +165,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     start = time.time()
     match_cntrs = np.array([0.97, 0.98, 0.99])
     if logFile:
-        log = open(logFileName, 'a')
+        log = open(logFile, 'a')
     while np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
         if count>0: 
             if logFile:
