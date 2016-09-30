@@ -99,7 +99,9 @@ if alert_type == 'new':
     except:
         print 'Could not create logs directory...'
         exit(1)
-    log = open(log_path + '/log_' + graceid + '.txt', 'a')
+    
+    logFileName = log_path + '/log_' + graceid + '.txt'
+    log = open(logFileName, 'a')
     log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
     try:
         os.system('mkdir -p ' + coinc_path)
@@ -146,7 +148,7 @@ if alert_type == 'new':
 
     File.close()
 
-    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, saveData=True)
+    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, lagFile=logFileName, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
 
     ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
