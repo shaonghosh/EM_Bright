@@ -7,6 +7,7 @@ from optparse import OptionParser, OptionGroup
 
 import numpy as np
 import time
+import datetime
 
 import lal
 import lalsimulation as lalsim
