@@ -37,7 +37,7 @@ samples = getSamples(1135654616, 10.0, 1.4, -0.5, 1000, {'H1=../psds_2016.xml.gz
 
 
 
-def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, saveData=False, plot=False, path=False, show=False):
+def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, logFile=False, saveData=False, plot=False, path=False, show=False):
     m1_SI = mass1 * lal.MSUN_SI
     m2_SI = mass2 * lal.MSUN_SI
     min_mc_factor, max_mc_factor = 0.9, 1.1
@@ -164,8 +164,17 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     count = 0
     start = time.time()
     match_cntrs = np.array([0.97, 0.98, 0.99])
+    if logFile:
+        log = open(logFileName, 'a')
     while np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
-        if count>0: print 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count])
+        if count>0: 
+            if logFile:
+                log.writelines( str(datetime.datetime.today()) + '\t' + 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count]) + '\n' )
+            else:
+                if logFile:
+                    log.writelines(str(datetime.datetime.today()) + '\t' + 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count]) + '\n')
+                else:
+                    print 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count])
         wide_match = 1 - (1 - match_cntrs[count])**(2/3.0)
         fit_cntr = match_cntrs[count] # Do the effective Fisher fit with pts above this match
         cut = rhos > fit_cntr
@@ -228,7 +237,13 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
             NN += 1
     cart_grid = np.array(cart_grid)
     sph_grid = np.array(sph_grid)
-    print 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid'
+    if logFile:
+        log.writelines(str(datetime.datetime.today()) + '\t' + 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid \n')
+    else:
+        if logFile:
+            log.writelines( str(datetime.datetime.today()) + '\t' + 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid' + '\n' )
+        else:
+            print 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid'
 
     # Rotate to get coordinates in parameter basis
     ### CHECK! No need to rotate again ###
@@ -311,6 +326,8 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
 
 
 def adapt_failure():
+    if logFile:
+        log.writelines( str(datetime.datetime.today()) + '\t' + 'Could not find an all positive set Evals in three attempts... Quitting program' + '\n')
     print 'Could not find an all positive set Evals in three attempts... Quitting program'
     outgrid = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
     np.savetxt('intrinsic_grid_Failed.dat', outgrid, newline="\t")
