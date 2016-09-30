@@ -171,10 +171,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
             if logFile:
                 log.writelines( str(datetime.datetime.today()) + '\t' + 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count]) + '\n' )
             else:
-                if logFile:
-                    log.writelines(str(datetime.datetime.today()) + '\t' + 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count]) + '\n')
-                else:
-                    print 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count])
+                print 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count])
         wide_match = 1 - (1 - match_cntrs[count])**(2/3.0)
         fit_cntr = match_cntrs[count] # Do the effective Fisher fit with pts above this match
         cut = rhos > fit_cntr
