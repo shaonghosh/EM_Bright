@@ -237,10 +237,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     if logFile:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid \n')
     else:
-        if logFile:
-            log.writelines( str(datetime.datetime.today()) + '\t' + 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid' + '\n' )
-        else:
-            print 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid'
+        print 'Selected ' + str(NN) + ' points from ' + str(NN_total) + ' random samples within the ellipsoid'
 
     # Rotate to get coordinates in parameter basis
     ### CHECK! No need to rotate again ###
@@ -325,7 +322,8 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
 def adapt_failure():
     if logFile:
         log.writelines( str(datetime.datetime.today()) + '\t' + 'Could not find an all positive set Evals in three attempts... Quitting program' + '\n')
-    print 'Could not find an all positive set Evals in three attempts... Quitting program'
+    else:
+        print 'Could not find an all positive set Evals in three attempts... Quitting program'
     outgrid = np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
     np.savetxt('intrinsic_grid_Failed.dat', outgrid, newline="\t")
     return np.array([np.nan, np.nan, np.nan])
