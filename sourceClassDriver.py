@@ -179,7 +179,7 @@ if alert_type == 'new':
 
     source_classification.close()
 
-    message = 'Computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(NS_prob_2_sngl) + '% \n'
+    message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(NS_prob_2_sngl) + '% \n'
 
     gdb.writeLog(graceid, message, tagname='em_follow')
 
