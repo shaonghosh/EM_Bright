@@ -2,6 +2,7 @@
 import os
 import json
 import numpy as np
+import sys
 from sys import stdin
 from sys import exit
 import time as Time
@@ -16,7 +17,7 @@ from getEllipsoidSamples import getSamples
 
 
 
-def getCoinc(graceid, coinc_path, psd_path):
+def getCoinc(graceid, gracedb_url, coinc_path, psd_path):
     '''
     Attempts to fetch a coinc and psd files of a given graceID from graceDB.
     Saves the files in the supplied coinc and psd paths.
@@ -26,7 +27,7 @@ def getCoinc(graceid, coinc_path, psd_path):
     ### Reed: "reading in an environmental variable here seems fine, but also overkill. 
     ### I don't see where this variable is set in initiate.py, so this could be fragile. 
     ### I'd suggest specifying it as a keyword argument instead." - Clarify this from Reed.
-    gracedb = ligo.gracedb.rest.GraceDb(os.environ.get('GRACEDB_SERVICE_URL', ligo.gracedb.rest.DEFAULT_SERVICE_URL))
+    gracedb = ligo.gracedb.rest.GraceDb( gracedb_url )
 
     try:
         coinc_object = gracedb.files(graceid, "coinc.xml")
@@ -66,8 +67,10 @@ def readCoinc(CoincFile):
 
 ### Reading information from config file ###
 configParser = ConfigParser.ConfigParser()
-configFile = 'configFile.ini'
-configParser.read(configFile)
+configParser.read( sys.argv[1] )
+gracedb_url = configParser.get('gracedb', 'gracedb_url')
+# configFile = 'configFile.ini'
+# configParser.read(configFile)
 coinc_path = configParser.get('Paths', 'coincPath')
 psd_path = configParser.get('Paths', 'psdPath')
 source_class_path = configParser.get('Paths', 'results')
@@ -83,7 +86,7 @@ the EM-Bright classification jobs.
 '''
 # Load the LVAlert message contents into a dictionary
 streamdata = json.loads(stdin.read())
-gdb = ligo.gracedb.rest.GraceDb()
+gdb = ligo.gracedb.rest.GraceDb( gracedb_url )
 
 #print streamdata
 # Do something with new events having FAR below threshold
@@ -122,7 +125,7 @@ if alert_type == 'new':
     countTrials = 0
     while x == 1:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
-        x = getCoinc(graceid, coinc_path, psd_path)
+        x = getCoinc(graceid, gracedb_url, coinc_path, psd_path)
         if countTrials >= 5:
             log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
             exit(1)
@@ -182,9 +185,4 @@ if alert_type == 'new':
     message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(NS_prob_2_sngl) + '% \n'
 
     gdb.writeLog(graceid, message, tagname='em_follow')
-
-
-
-
-
 
