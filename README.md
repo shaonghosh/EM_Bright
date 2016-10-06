@@ -12,12 +12,14 @@ lvalert_listen --user <user.name> --password <your password> -c /home/shaon/anal
 
 Notes: 
 
-Need PyCBC installation 
+1. Need PyCBC installation 
 
-Make sure your lalsuite installation is later than 23rd June.
+2. Make sure your lalsuite installation is later than 23rd June.
 
 
-Sample run command:
+3. Before running make sure the paths are correct in the two ini files (configFile.ini and myLVAlertListen.ini). Also make sure that the paths are correct in lvalert-run_cbc_gstlal_lowmass.sh. Change mode for lvalert-run_cbc_gstlal_lowmass.sh to 777.
+
+4. Sample run command:
 
 lvalert_listen --user shaon.ghosh  --netrc /home/shaon/.netrc -c /home/shaon/ANALYSIS/EM_Bright/myLVAlertListen.ini  -r alertInstance &
 
