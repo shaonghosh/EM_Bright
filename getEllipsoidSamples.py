@@ -78,7 +78,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
         if logFile:
             log.writelines( str(datetime.datetime.today()) + '\t' + 'Using SpinTaylorT4 approxoimation.' + '\n')
         else:
-            print 'Using SpinTaylorT4 approxoimation.'
+            print 'Using SpinTaylorT4 approximation.'
 
         PSIG = lsu.ChooseWaveformParams(
                 m1=m1_SI, m2=m2_SI, spin1z=chi1,
@@ -90,7 +90,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
         if logFile:
             log.writelines( str(datetime.datetime.today()) + '\t' + 'Using IMRPhenomPv2 approxoimation.' + '\n')
         else:
-            print 'Using IMRPhenomPv2 approxoimation.'
+            print 'Using IMRPhenomPv2 approximation.'
 
         PSIG = lsu.ChooseWaveformParams(
                 m1=m1_SI, m2=m2_SI, spin1z=chi1,
