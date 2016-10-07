@@ -31,26 +31,30 @@ This function gives the samples from the 3D ambiguity ellipsoid around the trigg
 mass2 and chi1 value.
 
 Example of the function call:
-samples = getSamples(1135654616, 10.0, 1.4, -0.5, 1000, {'H1=../psds_2016.xml.gz'}, {'L1=../psds_2016.xml.gz'}, saveData=True, plot=True, path=/path/where/you/want/the/output/to/go)
+samples = getSamples('TEST', 10.0, 1.4, -0.5, 12.0, 1000, {'H1=../psds_2016.xml.gz'}, {'L1=../psds_2016.xml.gz'}, saveData=True, plot=True, path=/path/where/you/want/the/output/to/go)
 
 '''
 
 
 
-def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, logFile=False, saveData=False, plot=False, path=False, show=False):
+def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, NMcs=5, NEtas=5, NChis=5, logFile=False, saveData=False, plot=False, path=False, show=False):
     m1_SI = mass1 * lal.MSUN_SI
     m2_SI = mass2 * lal.MSUN_SI
-    min_mc_factor, max_mc_factor = 0.9, 1.1
+#     min_mc_factor, max_mc_factor = 0.9, 1.1
+    min_mc_factor, max_mc_factor = 0.98, 1.02
     min_eta, max_eta = 0.05, 0.25
     min_chi1, max_chi1 = -0.99, 0.99
+
     # Control evaluation of the effective Fisher grid
-    NMcs = 5
-    NEtas = 5
-    NChis = 5
+#     NMcs = 10
+#     NEtas = 10
+#     NChis = 10
+
     # match_cntr = 0.9 # Fill an ellipsoid of match = 0.9
     bank_min_match = 0.97
     match_cntr = np.min([np.max([0.9, 1 - 9.2/2/network_snr**2]), bank_min_match]) ## Richard's suggestion
-    wide_match = 1 - (1 - match_cntr)**(2/3.0)
+#     wide_match = 1 - (1 - match_cntr)**(2/3.0)
+    wide_match =  match_cntr * 0.8 ### Richard's suggestion
     fit_cntr = match_cntr # Do the effective Fisher fit with pts above this match
     Nrandpts = samples # Requested number of pts to put inside the ellipsoid
 
@@ -66,12 +70,34 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     etaSIG = lsu.symRatio(m1_SI, m2_SI)
     chiSIG = chi1
 
-    PSIG = lsu.ChooseWaveformParams(
-            m1=m1_SI, m2=m2_SI, spin1z=chi1,
-            lambda1=lambda1, lambda2=lambda2,
-            fmin=template_min_freq,
-            approx=lalsim.GetApproximantFromString('SpinTaylorT4')
-            )
+    if logFile:
+        log = open(logFile, 'a') ### Generate log file
+
+
+    if (mass1 <= 5.0) * (chi1 <= 0.05): ## BNS and low-spin low-mass NSBH
+        if logFile:
+            log.writelines( str(datetime.datetime.today()) + '\t' + 'Using SpinTaylorT4 approxoimation.' + '\n')
+        else:
+            print 'Using SpinTaylorT4 approxoimation.'
+
+        PSIG = lsu.ChooseWaveformParams(
+                m1=m1_SI, m2=m2_SI, spin1z=chi1,
+                lambda1=lambda1, lambda2=lambda2,
+                fmin=template_min_freq,
+                approx=lalsim.GetApproximantFromString('SpinTaylorT4')
+                )
+    else:
+        if logFile:
+            log.writelines( str(datetime.datetime.today()) + '\t' + 'Using IMRPhenomPv2 approxoimation.' + '\n')
+        else:
+            print 'Using IMRPhenomPv2 approxoimation.'
+
+        PSIG = lsu.ChooseWaveformParams(
+                m1=m1_SI, m2=m2_SI, spin1z=chi1,
+                lambda1=lambda1, lambda2=lambda2,
+                fmin=template_min_freq,
+                approx=lalsim.IMRPhenomPv2
+                )
 
     # Find a deltaF sufficient for entire range to be explored
     PTEST = PSIG.copy()
@@ -96,23 +122,14 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
         del psd_map[inst]
 
     for psdf, insts in psd_map.iteritems():
-        #xmldoc = utils.load_filename(psdf, contenthandler=series.LIGOLWContentHandler) ## CHECK: This is for old series in pylal
         xmldoc = utils.load_filename(psdf, contenthandler=series.PSDContentHandler)
         # FIXME: How to handle multiple PSDs
         for inst in insts:
-#            psd = series.read_psd_xmldoc(xmldoc)[inst] ## CHECK: This is for old series in pylal
             psd = series.read_psd_xmldoc(xmldoc, root_name=None)[inst]
-#            psd_f_high = len(psd.data)*psd.deltaF ## CHECK: This for old series in pylal
             psd_f_high = len(psd.data.data)*psd.deltaF
             f = np.arange(0, psd_f_high, psd.deltaF)
-            fvals = np.arange(0, psd_f_high, PSIG.deltaF)
-            
-            ## Richard: try np.interp(fvals, f, psd.data.data) as code
-
-            def anon_interp(newf):
-                return np.interp(newf, f, psd.data.data)
-            #eff_fisher_psd = np.array(map(anon_interp, fvals))
-            eff_fisher_psd = np.interp(fvals, f, psd.data.data) ## CHECK
+            fvals = np.arange(0, psd_f_high, PSIG.deltaF)            
+            eff_fisher_psd = np.interp(fvals, f, psd.data.data)
 
     analyticPSD_Q = False
 
@@ -159,13 +176,11 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
 
     # Fit to determine effective Fisher matrix
     # Adapt the match value to make sure all the Evals are positive
-
+    gam_prior = np.diag([10.*10.,4*4.,1.])  # prior on mass, eta, chi.  (the 'prior' on mass is mainly used to regularize, and is too narrow)
     evals = np.array([-1, -1, -1])
     count = 0
     start = time.time()
     match_cntrs = np.array([0.97, 0.98, 0.99])
-    if logFile:
-        log = open(logFile, 'a')
     while np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
         if count>0: 
             if logFile:
@@ -179,13 +194,14 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
             fitgamma = eff.effectiveFisher(eff.residuals3d, rhos[cut], dMcFLAT_MSUN[cut], detaFLAT[cut], dchiFLAT[cut])
             # Find the eigenvalues/vectors of the effective Fisher matrix
             gam = eff.array_to_symmetric_matrix(fitgamma)
+            gam = gam + gam_prior 
             evals, evecs, rot = eff.eigensystem(gam)
             count += 1
             if (count >= 3) and np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
-                return adapt_failure()
+                return adapt_failure(logFile)
                 sys.exit()
         else:
-            return adapt_failure()
+            return adapt_failure(logFile)
             sys.exit()
 
     #
@@ -216,7 +232,6 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
 
         ### CHECK ####
         cart_grid_point = [x1, x2, x3]
-        sph_grid_point = [rrt, th, ph]
         cart_grid_point = np.array(np.real( np.dot(rot, cart_grid_point)) )
 
         rand_Mc = cart_grid_point[0] * lal.MSUN_SI + McSIG # Mc (kg)
@@ -230,7 +245,6 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
         joint_condition = condition1 * condition2 * condition3
         if joint_condition:
             cart_grid.append( [cart_grid_point[0], cart_grid_point[1], cart_grid_point[2]] ) ## CHECK
-            sph_grid.append([rrt, th, ph]) ### CHECK! Do we need this?
             NN += 1
     cart_grid = np.array(cart_grid)
     sph_grid = np.array(sph_grid)
@@ -263,7 +277,6 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     indices = np.arange(len(cart_grid))
     Mcs_MSUN, etas, chis = np.transpose(cart_grid) #### CHECK ####
     Mcs_MSUN = Mcs_MSUN / lal.MSUN_SI
-    radii, thetas, phis = np.transpose(sph_grid[phys_cut][keep_phys_spins]) #### CHECK ####
     outgrid = np.transpose((Mcs_MSUN,etas,chis)) #### CHECK ####
 
     if saveData:
@@ -319,7 +332,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
 
 
 
-def adapt_failure():
+def adapt_failure(logFile):
     if logFile:
         log.writelines( str(datetime.datetime.today()) + '\t' + 'Could not find an all positive set Evals in three attempts... Quitting program' + '\n')
     else:
