@@ -37,7 +37,7 @@ samples = getSamples('TEST', 10.0, 1.4, -0.5, 12.0, 1000, {'H1=../psds_2016.xml.
 
 
 
-def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, NMcs=5, NEtas=5, NChis=5, logFile=False, saveData=False, plot=False, path=False, show=False):
+def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, NMcs=5, NEtas=5, NChis=5, mass1_cut=5.0, chi1_cut=0.05, lowMass_approx='lalsim.SpinTaylorT4', highMass_approx='lalsim.IMRPhenomPv2', Forced=False, logFile=False, saveData=False, plot=False, path=False, show=False):
     m1_SI = mass1 * lal.MSUN_SI
     m2_SI = mass2 * lal.MSUN_SI
 #     min_mc_factor, max_mc_factor = 0.9, 1.1
@@ -73,10 +73,22 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
     if logFile:
         log = open(logFile, 'a') ### Generate log file
 
-
-    if (mass1 <= 5.0) * (chi1 <= 0.05): ## BNS and low-spin low-mass NSBH
+    if Forced + (mass1 > mass1_cut) * (chi1 > chi1_cut): ## If forced to use the IMR waveform, or if the mass2 and spin1z values are above the cut.
         if logFile:
-            log.writelines( str(datetime.datetime.today()) + '\t' + 'Using SpinTaylorT4 approxoimation.' + '\n')
+	    log.writelines( str(datetime.datetime.today()) + '\t' + 'Using IMRPhenomPv2 approximation.' + '\n')
+	else:
+	    print 'Using IMRPhenomPv2 approximation.'
+
+        PSIG = lsu.ChooseWaveformParams(
+                m1=m1_SI, m2=m2_SI, spin1z=chi1,
+                lambda1=lambda1, lambda2=lambda2,
+                fmin=template_min_freq,
+                approx=eval(highMass_approx)
+                )
+
+    else:
+        if logFile:
+            log.writelines( str(datetime.datetime.today()) + '\t' + 'Using SpinTaylorT4 approximation.' + '\n')
         else:
             print 'Using SpinTaylorT4 approximation.'
 
@@ -84,19 +96,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
                 m1=m1_SI, m2=m2_SI, spin1z=chi1,
                 lambda1=lambda1, lambda2=lambda2,
                 fmin=template_min_freq,
-                approx=lalsim.GetApproximantFromString('SpinTaylorT4')
-                )
-    else:
-        if logFile:
-            log.writelines( str(datetime.datetime.today()) + '\t' + 'Using IMRPhenomPv2 approxoimation.' + '\n')
-        else:
-            print 'Using IMRPhenomPv2 approximation.'
-
-        PSIG = lsu.ChooseWaveformParams(
-                m1=m1_SI, m2=m2_SI, spin1z=chi1,
-                lambda1=lambda1, lambda2=lambda2,
-                fmin=template_min_freq,
-                approx=lalsim.IMRPhenomPv2
+                approx=eval(lowMass_approx)
                 )
 
     # Find a deltaF sufficient for entire range to be explored
