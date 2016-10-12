@@ -125,25 +125,32 @@ if alert_type == 'new':
         exit(1)
 
 
-    x = 1
-    countTrials = 0
-    while x == 1:
+#     x = 1
+#     countTrials = 0
+#     while x == 1:
+#         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
+#         x = getCoinc(graceid, gracedb_url, coinc_path, psd_path)
+#         if countTrials >= numTrials:
+#             log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
+#             exit(1)
+#         if x == 1: Time.sleep(wait) ### Wait for five seconds if getCoinc is unsuccessful
+#         countTrials += 1
+# 
+#     log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
+    
+    
+    for countTrials in xrange(numTrials): ### iterate a maximum of numTrials times
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
-        x = getCoinc(graceid, gracedb_url, coinc_path, psd_path)
-        if countTrials >= numTrials:
-            log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
-            exit(1)
-        if x == 1: Time.sleep(wait) ### Wait for five seconds if getCoinc is unsuccessful
-        countTrials += 1
+        if getCoinc(graceid, gracedb_url, coinc_path, psd_path): ### this failed, so we sleep
+            Time.sleep(5)
+        else: ### success! so we exit the loop
+            break
+    else: ### we did not break from the loop, so we must have timed out
+        log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')       
+        exit(1)
 
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
 
-
-    ### Check if this event  has been analyzed ### 
-    ### This is not required anymoure since I am now only analyzing new events. Remove this ###
-    if os.path.isfile(source_class_path + '/Source_Classification_' + graceid + '_.dat'):
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Event already analyzed... skipping\n')
-        exit(0)
 
 
     start = Time.time()
