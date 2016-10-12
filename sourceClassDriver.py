@@ -24,9 +24,6 @@ def getCoinc(graceid, gracedb_url, coinc_path, psd_path):
     Returns zero if the fetching is successful.
     Returns one upon failure.
     '''
-    ### Reed: "reading in an environmental variable here seems fine, but also overkill. 
-    ### I don't see where this variable is set in initiate.py, so this could be fragile. 
-    ### I'd suggest specifying it as a keyword argument instead." - Clarify this from Reed.
     gracedb = ligo.gracedb.rest.GraceDb( gracedb_url )
 
     try:
@@ -69,8 +66,6 @@ def readCoinc(CoincFile):
 configParser = ConfigParser.ConfigParser()
 configParser.read( sys.argv[1] )
 gracedb_url = configParser.get('gracedb', 'gracedb_url')
-# configFile = 'configFile.ini'
-# configParser.read(configFile)
 coinc_path = configParser.get('Paths', 'coincPath')
 psd_path = configParser.get('Paths', 'psdPath')
 source_class_path = configParser.get('Paths', 'results')
@@ -78,7 +73,14 @@ log_path = configParser.get('Paths', 'logs')
 
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
 diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
+forced = configParser.get('EMBright', 'Forced')
+if forced == 'True': forced = True
+else: forced = False
 f_low = float( configParser.get('EMBright', 'fmin') )
+mass1_cut = float( configParser.get('EMBright', 'mass1_cut') )
+chi1_cut = float( configParser.get('EMBright', 'chi1_cut') )
+lowMass_approx = configParser.get('EMBright', 'lowMass_approx')
+highMass_approx = configParser.get('EMBright', 'highMass_approx')
 
 '''
 Receives alerts from graceDB, obtains the required coinc and psd files and then launches
@@ -151,7 +153,7 @@ if alert_type == 'new':
 
     File.close()
 
-    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, logFile=logFileName, saveData=True)
+    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
 
     ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
