@@ -157,7 +157,7 @@ if alert_type == 'new':
     coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
     [mass1, mass2, chi1, time, snr] = readCoinc(coincFileName)
 
-    File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
+    File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w') ## This is for the ease of diagnosis
     File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
 
     File.close()
