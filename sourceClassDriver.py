@@ -70,6 +70,8 @@ coinc_path = configParser.get('Paths', 'coincPath')
 psd_path = configParser.get('Paths', 'psdPath')
 source_class_path = configParser.get('Paths', 'results')
 log_path = configParser.get('Paths', 'logs')
+numTrials = int( configParser.get('Paths', 'numTrials') )
+wait = float( configParser.get('Paths', 'wait') )
 
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
 diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
@@ -128,10 +130,10 @@ if alert_type == 'new':
     while x == 1:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
         x = getCoinc(graceid, gracedb_url, coinc_path, psd_path)
-        if countTrials >= 5:
+        if countTrials >= numTrials:
             log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
             exit(1)
-        if x == 1: Time.sleep(5) ### Wait for five seconds if getCoinc is unsuccessful
+        if x == 1: Time.sleep(wait) ### Wait for five seconds if getCoinc is unsuccessful
         countTrials += 1
 
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
