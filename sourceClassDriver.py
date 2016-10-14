@@ -55,8 +55,9 @@ def readCoinc(CoincFile):
     snr1 = coinc.get_column('snr')[0]
     snr2 = coinc.get_column('snr')[1]
     snr = np.max([snr1, snr2]) ## Only returning the largest snr
+    maxSNRindex = np.argmax( np.array([snr1, snr2]) )
 
-    return [float(mass1), float(mass2), float(chi1), int(time), float(snr)]
+    return [float(mass1), float(mass2), float(chi1), int(time), float(snr), maxSNRindex]
 
 
 
@@ -155,14 +156,15 @@ if alert_type == 'new':
 
     start = Time.time()
     coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
-    [mass1, mass2, chi1, time, snr] = readCoinc(coincFileName)
+    [mass1, mass2, chi1, time, snr, maxSNRindex] = readCoinc(coincFileName)
+    ifoDict = {0: 'H1', 1: 'L1'}
 
-    File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w') ## This is for the ease of diagnosis
+    File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
     File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
 
     File.close()
 
-    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {'H1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, {'L1=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
+    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifoDict[maxSNRindex]+'=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
 
     ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
