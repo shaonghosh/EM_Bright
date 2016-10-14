@@ -37,7 +37,7 @@ samples = getSamples('TEST', 10.0, 1.4, -0.5, 12.0, 1000, {'H1=../psds_2016.xml.
 
 
 
-def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, fmin=30, NMcs=5, NEtas=5, NChis=5, mass1_cut=5.0, chi1_cut=0.05, lowMass_approx='lalsim.SpinTaylorT4', highMass_approx='lalsim.IMRPhenomPv2', Forced=False, logFile=False, saveData=False, plot=False, path=False, show=False):
+def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, NMcs=5, NEtas=5, NChis=5, mass1_cut=5.0, chi1_cut=0.05, lowMass_approx='lalsim.SpinTaylorT4', highMass_approx='lalsim.IMRPhenomPv2', Forced=False, logFile=False, saveData=False, plot=False, path=False, show=False):
     m1_SI = mass1 * lal.MSUN_SI
     m2_SI = mass2 * lal.MSUN_SI
 #     min_mc_factor, max_mc_factor = 0.9, 1.1
@@ -113,7 +113,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
 
     PTMPLT = PSIG.copy()
 
-    psd_map = common_cl.parse_cl_key_value(h_PSD)
+    psd_map = common_cl.parse_cl_key_value(PSD)
     for inst, psdfile in psd_map.items():
         if psd_map.has_key(psdfile):
             psd_map[psdfile].add(inst)
@@ -133,7 +133,9 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, h_PSD, l_PSD, 
 
     analyticPSD_Q = False
 
-    IP = lsu.Overlap(fLow = ip_min_freq,
+    freq_upper_bound = np.min( [2000.0, (psd.data.length) * (psd.deltaF) * 0.98])
+    print 'freq_upper_bound = ' + str(freq_upper_bound)
+    IP = lsu.Overlap(fLow = ip_min_freq, fMax=freq_upper_bound,
         deltaF = PSIG.deltaF,
         psd = eff_fisher_psd,
         analyticPSD_Q = analyticPSD_Q
