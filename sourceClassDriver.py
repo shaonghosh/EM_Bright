@@ -144,7 +144,7 @@ if streamdata['alert_type'] == 'new':
     for countTrials in xrange(numTrials): ### iterate a maximum of numTrials times
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
         if getCoinc(graceid, gracedb_url, coinc_path, psd_path): ### this failed, so we sleep
-            Time.sleep(5)
+            Time.sleep(wait)
         else: ### success! so we exit the loop
             break
     else: ### we did not break from the loop, so we must have timed out
