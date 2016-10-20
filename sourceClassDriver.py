@@ -97,9 +97,9 @@ gdb = ligo.gracedb.rest.GraceDb( gracedb_url )
 #print streamdata
 # Do something with new events having FAR below threshold
 
-alert_type = 'None'
-if streamdata['alert_type']:
-    alert_type = streamdata['alert_type']
+# alert_type = 'None'
+# if streamdata['alert_type']:
+#     alert_type = streamdata['alert_type']
 
 if alert_type == 'new':
     graceid = str(streamdata['uid'])
