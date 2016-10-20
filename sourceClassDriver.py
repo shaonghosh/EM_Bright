@@ -101,7 +101,7 @@ gdb = ligo.gracedb.rest.GraceDb( gracedb_url )
 # if streamdata['alert_type']:
 #     alert_type = streamdata['alert_type']
 
-if alert_type == 'new':
+if streamdata['alert_type'] == 'new':
     graceid = str(streamdata['uid'])
     try:
         os.system('mkdir -p ' + log_path)
