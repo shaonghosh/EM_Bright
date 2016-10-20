@@ -85,6 +85,7 @@ mass1_cut = float( configParser.get('EMBright', 'mass1_cut') )
 chi1_cut = float( configParser.get('EMBright', 'chi1_cut') )
 lowMass_approx = configParser.get('EMBright', 'lowMass_approx')
 highMass_approx = configParser.get('EMBright', 'highMass_approx')
+tagnames = configParser.get('gracedb', 'tagnames').split() 
 
 '''
 Receives alerts from graceDB, obtains the required coinc and psd files and then launches
@@ -198,5 +199,6 @@ if streamdata['alert_type'] == 'new':
 
     message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(NS_prob_2_sngl) + '% \n'
 
-    gdb.writeLog(graceid, message, tagname='em_follow')
+#    gdb.writeLog(graceid, message, tagname='em_follow')
+    gdb.writeLog(graceid, message, tagnames=tagnames)
 
