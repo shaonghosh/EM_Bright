@@ -171,13 +171,20 @@ if streamdata['alert_type'] == 'new':
 
     
     ### Find an appropriate use of this file (e.g. uploading this as JSON) else get rid of it ###
-    source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
-    source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
-    source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(em_bright_prob_sngl) + '% \n')
+#     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
+#     source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
+#     source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(em_bright_prob_sngl) + '% \n')
 
-    source_classification.close()
+#     source_classification.close()
 
     message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
-    gdb.writeLog(graceid, message, tagname=tagnames)
+    filename = source_class_path + '/Source_Classification_' + graceid + '_.json'
+    file_obj = open(filename, 'w')
+    file_obj.write( json.dumps( {'Prob NS2':NS_prob_2_sngl, 'Prob EMbright':em_bright_prob_sngl} ) )
+    file_obj.close()
+
+    gdb.writeLog( graceid, message, filename=filename, tagname=tagnames )
+
+#     gdb.writeLog(graceid, message, tagname=tagnames)
 
