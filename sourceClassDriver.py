@@ -42,23 +42,6 @@ def getCoinc(graceid, gracedb_url, coinc_path, psd_path):
     except:
         return 1
 
-
-# def readCoinc(CoincFile):
-#     '''
-#     Reads the coinc file and returns the masses, chi1 and gps times as a list.
-#     '''
-#     coinc = SnglInspiralUtils.ReadSnglInspiralFromFiles(CoincFile)
-#     mass1 = coinc.get_column('mass1')[0]
-#     mass2 = coinc.get_column('mass2')[0]
-#     chi1 = coinc.get_column('spin1z')[0]
-#     time = coinc.get_column('end_time')[0]
-#     snr1 = coinc.get_column('snr')[0]
-#     snr2 = coinc.get_column('snr')[1]
-#     snr = np.max([snr1, snr2]) ## Only returning the largest snr
-#     maxSNRindex = np.argmax( np.array([snr1, snr2]) )
-
-#     return [float(mass1), float(mass2), float(chi1), int(time), float(snr), maxSNRindex]
-
 def readCoinc(CoincFile):
     '''
     Reads the coinc file. Finds the highest SNR IFO and returns the point estimates of the same.
@@ -156,7 +139,6 @@ if streamdata['alert_type'] == 'new':
     start = Time.time()
     coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
     [mass1, mass2, chi1, snr, ifo] = readCoinc(coincFileName)
-#     ifoDict = {0: 'H1', 1: 'L1'}
 
     File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
     File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
@@ -196,6 +178,5 @@ if streamdata['alert_type'] == 'new':
 
     message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
-#    gdb.writeLog(graceid, message, tagname='em_follow')
     gdb.writeLog(graceid, message, tagname=tagnames)
 
