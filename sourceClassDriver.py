@@ -75,6 +75,7 @@ wait = float( configParser.get('Paths', 'wait') )
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
 diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
 forced = configParser.getboolean('EMBright', 'Forced')
+write_text = configParser.getboolean('EMBright', 'writeText')
 f_low = float( configParser.get('EMBright', 'fmin') )
 mass1_cut = float( configParser.get('EMBright', 'mass1_cut') )
 chi1_cut = float( configParser.get('EMBright', 'chi1_cut') )
@@ -140,10 +141,10 @@ if streamdata['alert_type'] == 'new':
     coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
     [mass1, mass2, chi1, snr, ifo] = readCoinc(coincFileName)
 
-    File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
-    File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
-
-    File.close()
+    if write_text: ### Write the masses, spin and highest SNR in a text file in the all_coinc directory
+        File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
+        File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
+        File.close()
 
     samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifo + '=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
