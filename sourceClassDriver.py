@@ -76,7 +76,7 @@ wait = float( configParser.get('Paths', 'wait') )
 
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
 diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
-forced = configParser.getbooleaan('EMBright', 'Forced')
+forced = configParser.getboolean('EMBright', 'Forced')
 # forced = configParser.get('EMBright', 'Forced')
 # if forced == 'True': forced = True
 # else: forced = False
