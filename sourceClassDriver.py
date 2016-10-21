@@ -200,5 +200,5 @@ if streamdata['alert_type'] == 'new':
     message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
 #    gdb.writeLog(graceid, message, tagname='em_follow')
-    gdb.writeLog(graceid, message, tagnames=tagnames)
+    gdb.writeLog(graceid, message, tagname=tagnames)
 
