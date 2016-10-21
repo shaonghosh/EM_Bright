@@ -43,21 +43,36 @@ def getCoinc(graceid, gracedb_url, coinc_path, psd_path):
         return 1
 
 
+# def readCoinc(CoincFile):
+#     '''
+#     Reads the coinc file and returns the masses, chi1 and gps times as a list.
+#     '''
+#     coinc = SnglInspiralUtils.ReadSnglInspiralFromFiles(CoincFile)
+#     mass1 = coinc.get_column('mass1')[0]
+#     mass2 = coinc.get_column('mass2')[0]
+#     chi1 = coinc.get_column('spin1z')[0]
+#     time = coinc.get_column('end_time')[0]
+#     snr1 = coinc.get_column('snr')[0]
+#     snr2 = coinc.get_column('snr')[1]
+#     snr = np.max([snr1, snr2]) ## Only returning the largest snr
+#     maxSNRindex = np.argmax( np.array([snr1, snr2]) )
+
+#     return [float(mass1), float(mass2), float(chi1), int(time), float(snr), maxSNRindex]
+
 def readCoinc(CoincFile):
     '''
-    Reads the coinc file and returns the masses, chi1 and gps times as a list.
+    Reads the coinc file. Finds the highest SNR IFO and returns the point estimates of the same.
     '''
     coinc = SnglInspiralUtils.ReadSnglInspiralFromFiles(CoincFile)
-    mass1 = coinc.get_column('mass1')[0]
-    mass2 = coinc.get_column('mass2')[0]
-    chi1 = coinc.get_column('spin1z')[0]
-    time = coinc.get_column('end_time')[0]
-    snr1 = coinc.get_column('snr')[0]
-    snr2 = coinc.get_column('snr')[1]
-    snr = np.max([snr1, snr2]) ## Only returning the largest snr
-    maxSNRindex = np.argmax( np.array([snr1, snr2]) )
-
-    return [float(mass1), float(mass2), float(chi1), int(time), float(snr), maxSNRindex]
+    ifo=[]; mass1=[]; mass2=[]; chi1=[]; snr= np.array([])
+    for row in coinc:
+        ifo.append(row.ifo)
+        mass1.append(row.mass1)
+        mass2.append(row.mass2)
+        chi1.append(row.spin1z)
+        snr = np.append(snr, row.snr)        
+    index = np.argmax(snr) ## To return highest SNR IFO point estimates
+    return [mass1[index], mass2[index], chi1[index], snr[index], str(ifo[index])]
 
 
 
@@ -77,9 +92,6 @@ wait = float( configParser.get('Paths', 'wait') )
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
 diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
 forced = configParser.getboolean('EMBright', 'Forced')
-# forced = configParser.get('EMBright', 'Forced')
-# if forced == 'True': forced = True
-# else: forced = False
 f_low = float( configParser.get('EMBright', 'fmin') )
 mass1_cut = float( configParser.get('EMBright', 'mass1_cut') )
 chi1_cut = float( configParser.get('EMBright', 'chi1_cut') )
@@ -126,21 +138,6 @@ if streamdata['alert_type'] == 'new':
     except:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Failed to creat coinc and/or psd and/or results directory, Check write privilege to the given path\n')
         exit(1)
-
-
-#     x = 1
-#     countTrials = 0
-#     while x == 1:
-#         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
-#         x = getCoinc(graceid, gracedb_url, coinc_path, psd_path)
-#         if countTrials >= numTrials:
-#             log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
-#             exit(1)
-#         if x == 1: Time.sleep(wait) ### Wait for five seconds if getCoinc is unsuccessful
-#         countTrials += 1
-# 
-#     log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
-    
     
     for countTrials in xrange(numTrials): ### iterate a maximum of numTrials times
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
@@ -158,15 +155,15 @@ if streamdata['alert_type'] == 'new':
 
     start = Time.time()
     coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
-    [mass1, mass2, chi1, time, snr, maxSNRindex] = readCoinc(coincFileName)
-    ifoDict = {0: 'H1', 1: 'L1'}
+    [mass1, mass2, chi1, snr, ifo] = readCoinc(coincFileName)
+#     ifoDict = {0: 'H1', 1: 'L1'}
 
     File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
     File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
 
     File.close()
 
-    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifoDict[maxSNRindex]+'=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
+    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifo + '=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
 
     ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
