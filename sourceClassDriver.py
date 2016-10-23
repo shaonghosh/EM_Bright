@@ -65,15 +65,15 @@ def readCoinc(CoincFile):
 configParser = ConfigParser.ConfigParser()
 configParser.read( sys.argv[1] )
 gracedb_url = configParser.get('gracedb', 'gracedb_url')
-coinc_path = configParser.get('Paths', 'coincPath')
-psd_path = configParser.get('Paths', 'psdPath')
-source_class_path = configParser.get('Paths', 'results')
+coinc_path = configParser.get('Paths', 'coincPath') ## Where coinc files are to be stored
+psd_path = configParser.get('Paths', 'psdPath') ## Where psd files are to be stored
+source_class_path = configParser.get('Paths', 'results') ## Where the result .json file is saved
 log_path = configParser.get('Paths', 'logs')
-numTrials = int( configParser.get('Paths', 'numTrials') )
-wait = float( configParser.get('Paths', 'wait') )
+numTrials = int( configParser.get('Paths', 'numTrials') ) ## Number of trials to fetch the coinc files.
+wait = float( configParser.get('Paths', 'wait') ) ## Wait time between each trials
 
-ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') )
-diskMassThreshold = float( configParser.get('EMBright', 'diskMassThreshold') )
+ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') ) ## Number of samples within ellipsoid on which the EM-Bright analysis will be conducted
+remMassThreshold = float( configParser.get('EMBright', 'remMassThreshold') ) 
 forced = configParser.getboolean('EMBright', 'Forced')
 write_text = configParser.getboolean('EMBright', 'writeText')
 f_low = float( configParser.get('EMBright', 'fmin') )
@@ -151,7 +151,7 @@ if streamdata['alert_type'] == 'new':
 
     ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
     if ~np.any( np.isnan(samples_sngl[0]) ): 
-        diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', diskMassThreshold)
+        diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', remMassThreshold)
         [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
         em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
 
@@ -173,11 +173,11 @@ if streamdata['alert_type'] == 'new':
     ### Find an appropriate use of this file (e.g. uploading this as JSON) else get rid of it ###
 #     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
 #     source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
-#     source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(em_bright_prob_sngl) + '% \n')
+#     source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(em_bright_prob_sngl) + '% \n')
 
 #     source_classification.close()
 
-    message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(diskMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
+    message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
     filename = source_class_path + '/Source_Classification_' + graceid + '_.json'
     file_obj = open(filename, 'w')
