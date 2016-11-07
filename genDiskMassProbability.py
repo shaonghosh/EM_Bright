@@ -1,11 +1,12 @@
 import numpy as np
 import em_progenitors
-import readMassXML
+#import readMassXML
 import sys
 
 
 class genDiskMass:
-    def __init__(self, input, output, threshold):
+    def __init__(self, input, output, threshold):	# RE: different from Reed's patch here. Probably this does not need modification
+							# New instance variable used by Reed is already present as self.max_ns_g_mass
         '''
         input could be a posterior sample from lalinference output, 
         3D ambiguiity ellipsoid sample, 2D ambiguity ellipse samples 
@@ -36,8 +37,8 @@ class genDiskMass:
         self.eta = massRatio/((1 + massRatio)**2)
         self.mPrimary = (massRatio**(-0.6)) * mc * (1. + massRatio)**0.2
         self.mSecondary = (massRatio**0.4) * mc * (1. + massRatio)**0.2
-        NS_prob_2 = np.sum(self.mSecondary < 3.0)*100./len(self.mSecondary)
-        NS_prob_1 = np.sum(self.mPrimary < 3.0)*100./len(self.mPrimary)
+        NS_prob_2 = np.sum(self.mSecondary < self.max_ns_g_mass)*100./len(self.mSecondary) # RE: Max NS mass was hardcoded as 3.0. Should be gotten from class variable
+        NS_prob_1 = np.sum(self.mPrimary < self.max_ns_g_mass)*100./len(self.mPrimary)
         return [NS_prob_1, NS_prob_2, self.computeRemMass()]
         
     def fromMassSpinAmbiguity(self):
@@ -52,8 +53,8 @@ class genDiskMass:
         self.chi = data[:,3]
         self.mPrimary = 0.5*mc*(self.eta**(-3./5.))*(1 + np.sqrt(1 - 4*self.eta))
         self.mSecondary = 0.5*mc*(self.eta**(-3./5.))*(1 - np.sqrt(1 - 4*self.eta))
-        NS_prob_2 = np.sum(self.mSecondary < 3.0)*100./len(self.mSecondary)
-        NS_prob_1 = np.sum(self.mPrimary < 3.0)*100./len(self.mPrimary)
+        NS_prob_2 = np.sum(self.mSecondary < self.max_ns_g_mass)*100./len(self.mSecondary)
+        NS_prob_1 = np.sum(self.mPrimary < self.max_ns_g_mass)*100./len(self.mPrimary)
         return [NS_prob_1, NS_prob_2, self.computeRemMass()]
 
     def fromEllipsoidSample(self):
@@ -69,8 +70,8 @@ class genDiskMass:
         self.chi = data[:,2]
         self.mPrimary = 0.5*mc*(self.eta**(-3./5.))*(1 + np.sqrt(1 - 4*self.eta))
         self.mSecondary = 0.5*mc*(self.eta**(-3./5.))*(1 - np.sqrt(1 - 4*self.eta))
-        NS_prob_2 = np.sum(self.mSecondary < 3.0)*100./len(self.mSecondary)
-        NS_prob_1 = np.sum(self.mPrimary < 3.0)*100./len(self.mPrimary)
+        NS_prob_2 = np.sum(self.mSecondary < self.max_ns_g_mass)*100./len(self.mSecondary)
+        NS_prob_1 = np.sum(self.mPrimary < self.max_ns_g_mass)*100./len(self.mPrimary)
         return [NS_prob_1, NS_prob_2, self.computeRemMass()]
 
         
@@ -89,5 +90,12 @@ class genDiskMass:
         return np.array(remnant_mass)
 
         
-
-
+# Reed's edit. New function to give the EM bright probability using new EMbright boundary
+    def computeEMBrightProb(self):
+	'''
+	Computes EM bright probability using remnant disk mass and max NS mass.
+	Draws the boundary of max NS mass and Foucart expression
+	'''
+	remMass = self.computeRemMass()
+	prob	= (self.mPrimary < self.max_ns_g_mass)*(self.mSecondary < self.max_ns_g_mass) + (remMass > self.threshold)
+	return 100.0*np.sum(prob > 0.) / len(prob)
