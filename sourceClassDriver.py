@@ -187,6 +187,6 @@ if streamdata['alert_type'] == 'new':
     file_obj.close()
 
     #gdb.writeLog( graceid, message, filename=filename, tagname=tagnames )
-
-#     gdb.writeLog(graceid, message, tagname=tagnames)
+    if gdbwrite:
+        gdb.writeLog(graceid, message, tagname=tagnames)
 
