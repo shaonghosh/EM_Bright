@@ -53,7 +53,7 @@ def readCoinc(CoincFile):
         mass1.append(row.mass1)
         mass2.append(row.mass2)
         chi1.append(row.spin1z)
-        snr = np.append(snr, row.snr)        
+        snr = np.append(snr, row.snr)
     index = np.argmax(snr) ## To return highest SNR IFO point estimates
     return [mass1[index], mass2[index], chi1[index], snr[index], str(ifo[index])]
 
@@ -72,15 +72,16 @@ numTrials = int( configParser.get('Paths', 'numTrials') ) ## Number of trials to
 wait = float( configParser.get('Paths', 'wait') ) ## Wait time between each trials
 
 ellipsoidSample = int( configParser.get('EMBright', 'elipsoidSample') ) ## Number of samples within ellipsoid on which the EM-Bright analysis will be conducted
-remMassThreshold = float( configParser.get('EMBright', 'remMassThreshold') ) 
+remMassThreshold = float( configParser.get('EMBright', 'remMassThreshold') )
 forced = configParser.getboolean('EMBright', 'Forced')
+gdbwrite = configParser.getboolean('gracedb', 'gdbwrite')
 write_text = configParser.getboolean('EMBright', 'writeText')
 f_low = float( configParser.get('EMBright', 'fmin') )
 mass1_cut = float( configParser.get('EMBright', 'mass1_cut') )
 chi1_cut = float( configParser.get('EMBright', 'chi1_cut') )
 lowMass_approx = configParser.get('EMBright', 'lowMass_approx')
 highMass_approx = configParser.get('EMBright', 'highMass_approx')
-tagnames = configParser.get('gracedb', 'tagnames').split() 
+tagnames = configParser.get('gracedb', 'tagnames').split()
 
 '''
 Receives alerts from graceDB, obtains the required coinc and psd files and then launches
@@ -104,7 +105,7 @@ if streamdata['alert_type'] == 'new':
     except:
         print 'Could not create logs directory...'
         exit(1)
-    
+
     logFileName = log_path + '/log_' + graceid + '.txt'
     log = open(logFileName, 'a')
     log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
@@ -121,7 +122,7 @@ if streamdata['alert_type'] == 'new':
     except:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Failed to creat coinc and/or psd and/or results directory, Check write privilege to the given path\n')
         exit(1)
-    
+
     for countTrials in xrange(numTrials): ### iterate a maximum of numTrials times
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
         if getCoinc(graceid, gracedb_url, coinc_path, psd_path): ### this failed, so we sleep
@@ -129,7 +130,7 @@ if streamdata['alert_type'] == 'new':
         else: ### success! so we exit the loop
             break
     else: ### we did not break from the loop, so we must have timed out
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')       
+        log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
         exit(1)
 
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
@@ -149,7 +150,7 @@ if streamdata['alert_type'] == 'new':
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
 
     ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
-    if ~np.any( np.isnan(samples_sngl[0]) ): 
+    if ~np.any( np.isnan(samples_sngl[0]) ):
         diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', remMassThreshold)
         [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
         #em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
@@ -160,17 +161,17 @@ if streamdata['alert_type'] == 'new':
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Return was NaNs\n')
         [NS_prob_2_sngl, em_bright_prob_sngl] = [0., 0.]
         message = 'EM-Bright probabilities computation failed for trigger + ' + graceid + '\n'
-
-        #gdb.writeLog(graceid, message, tagname='em_follow')
+        if gdbwrite: ### Write to graceDB only if gdbwrite flag is True.
+            gdb.writeLog(graceid, message, tagname='em_follow')
         end = Time.time()
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')        
+        log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
         exit(0)
-        
+
 
     end = Time.time()
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
 
-    
+
     ### Find an appropriate use of this file (e.g. uploading this as JSON) else get rid of it ###
 #     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
 #     source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
