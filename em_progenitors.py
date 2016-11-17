@@ -17,9 +17,6 @@
 from __future__ import division
 import math
 import numpy as np
-import pycbc
-import pycbc.tmpltbank.em_progenitors
-#from pycbc.tmpltbank import NS_SEQUENCE_FILE_DIRECTORY
 import os.path
 import scipy.optimize
 import scipy.interpolate
@@ -286,8 +283,8 @@ def load_ns_sequence(eos_name):
     ns_sequence = []
 
     if eos_name == '2H':
-        ns_sequence_path = os.path.join(pycbc.tmpltbank.NS_SEQUENCE_FILE_DIRECTORY, 'equil_2H.dat')
-        #ns_sequence_path = os.path.join(NS_SEQUENCE_FILE_DIRECTORY, 'equil_2H.dat')
+
+	ns_sequence_path = os.path.join('/home/deep.chatterjee/LIGOProject/INJECTIONs', 'equil_2H.dat')
         ns_sequence = np.loadtxt(ns_sequence_path)
     else:
         print 'Only the 2H EOS is currently supported!'
@@ -418,10 +415,9 @@ def remnant_mass(eta, ns_g_mass, ns_sequence, chi, incl, shift):
     """
     # Sanity checks
     if not (eta>0. and eta<=0.25 and abs(chi)<=1):
-        return [0] ### CHECK ###
-#         print 'The BH spin magnitude must be <=1 and eta must be between 0 and 0.25'
-#         print 'This script was launched with ns_mass={0}, eta={1}, chi={2}, inclination={3}\n'.format(ns_b_mass, eta, chi, incl)
-#         raise Exception('Unphysical parameters!')
+        print 'The BH spin magnitude must be <=1 and eta must be between 0 and 0.25'
+        print 'This script was launched with ns_mass={0}, eta={1}, chi={2}, inclination={3}\n'.format(ns_b_mass, eta, chi, incl)
+        raise Exception('Unphysical parameters!')
 
     # Binary mass ratio define to be > 1
     q = (1+math.sqrt(1-4*eta)-2*eta)/eta*0.5
@@ -516,7 +512,7 @@ def remnant_mass_ulim(eta, ns_g_mass, bh_spin_z, ns_sequence, max_ns_g_mass, shi
     default_remnant_mass = 100.
     if not ns_g_mass > max_ns_g_mass:
         bh_spin_inclination = np.arccos(bh_spin_z/bh_spin_magnitude)
-        remnant_mass_upper_limit = pycbc.tmpltbank.em_progenitors.remnant_mass(eta, ns_g_mass, ns_sequence, bh_spin_magnitude, bh_spin_inclination, shift)
+        remnant_mass_upper_limit = remnant_mass(eta, ns_g_mass, ns_sequence, bh_spin_magnitude, bh_spin_inclination, shift)
     else:
         remnant_mass_upper_limit = default_remnant_mass
 

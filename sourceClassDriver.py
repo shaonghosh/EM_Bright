@@ -58,7 +58,6 @@ def readCoinc(CoincFile):
     return [mass1[index], mass2[index], chi1[index], snr[index], str(ifo[index])]
 
 
-
 #########################################################################################
 
 ### Reading information from config file ###
@@ -153,14 +152,16 @@ if streamdata['alert_type'] == 'new':
     if ~np.any( np.isnan(samples_sngl[0]) ): 
         diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', remMassThreshold)
         [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
-        em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
+        #em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
+        em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb() # RE: Probability using new EM bright boundary
+	#NS_prob_1_sngl, NS_prob_2_sngl, em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb()
 
     else:
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Return was NaNs\n')
         [NS_prob_2_sngl, em_bright_prob_sngl] = [0., 0.]
         message = 'EM-Bright probabilities computation failed for trigger + ' + graceid + '\n'
 
-        gdb.writeLog(graceid, message, tagname='em_follow')
+        #gdb.writeLog(graceid, message, tagname='em_follow')
         end = Time.time()
         log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')        
         exit(0)
@@ -184,7 +185,7 @@ if streamdata['alert_type'] == 'new':
     file_obj.write( json.dumps( {'Prob NS2':NS_prob_2_sngl, 'Prob EMbright':em_bright_prob_sngl} ) )
     file_obj.close()
 
-    gdb.writeLog( graceid, message, filename=filename, tagname=tagnames )
+    #gdb.writeLog( graceid, message, filename=filename, tagname=tagnames )
 
 #     gdb.writeLog(graceid, message, tagname=tagnames)
 
