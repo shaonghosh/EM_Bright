@@ -8,6 +8,7 @@ from sys import exit
 import time as Time
 import datetime
 import ConfigParser
+import optparse
 
 import ligo.gracedb.rest
 from pylal import SnglInspiralUtils
@@ -58,11 +59,48 @@ def readCoinc(CoincFile):
     return [mass1[index], mass2[index], chi1[index], snr[index], str(ifo[index])]
 
 
+######### Options to be parsed from the command line #########
+parser = optparse.OptionParser()
+parser.add_option("-G", "--graceid",action="store",type="string", metavar=" NAME", help="The GraceDB ID of the event on which the EM-Bright codes need to be run.")
+parser.add_option("-C", "--configfile",action="store",type="string", metavar=" NAME", help="The name of the config file")
+parser.add_option("-P", "--psd",action="store",type="string", metavar=" NAME", help="The name of the psd file (if --graceid was not given)")
+parser.add_option("-m", "--mass1",action="store",type="float", metavar=" NAME", help="value of mass1")
+parser.add_option("-n", "--mass2",action="store",type="float", metavar=" NAME", help="value of mass2")
+parser.add_option("-c", "--chi1",action="store",type="float", metavar=" NAME", help="value of chi1")
+
+(opts,args) = parser.parse_args()
+
 #########################################################################################
+
+### Sanity checks ###
+if not opts.configfile:
+    print 'Must provide config file...'
+    exit(1)
+
+if not opts.graceid:
+    if not opts.psd:
+        print 'Must provide psd file...'
+        exit(1)
+    if not opts.mass1:
+        print 'Must provide mass 1'
+        exit(1)
+    if not opts.mass2:
+        print 'Must provide mass 2'
+    if not opts.chi1:
+        print 'Must provide chi 1'
+        exit(1)
+
+else:
+    if (opts.psd or opts.mass1 or opts.mass2 or opts.chi1):
+        print 'Can not provide parameter option along with grace ID.'
+        exit(1)
+
+
+
 
 ### Reading information from config file ###
 configParser = ConfigParser.ConfigParser()
-configParser.read( sys.argv[1] )
+configParser.read( opts.configfile)
 gracedb_url = configParser.get('gracedb', 'gracedb_url')
 coinc_path = configParser.get('Paths', 'coincPath') ## Where coinc files are to be stored
 psd_path = configParser.get('Paths', 'psdPath') ## Where psd files are to be stored
@@ -87,9 +125,11 @@ tagnames = configParser.get('gracedb', 'tagnames').split()
 Receives alerts from graceDB, obtains the required coinc and psd files and then launches
 the EM-Bright classification jobs.
 '''
+gdb = ligo.gracedb.rest.GraceDb( gracedb_url )
+### THIS NEEDS TO BE REMOVED ###
+'''
 # Load the LVAlert message contents into a dictionary
 streamdata = json.loads(stdin.read())
-gdb = ligo.gracedb.rest.GraceDb( gracedb_url )
 
 #print streamdata
 # Do something with new events having FAR below threshold
@@ -99,94 +139,95 @@ gdb = ligo.gracedb.rest.GraceDb( gracedb_url )
 #     alert_type = streamdata['alert_type']
 
 if streamdata['alert_type'] == 'new':
-    graceid = str(streamdata['uid'])
-    try:
-        os.system('mkdir -p ' + log_path)
-    except:
-        print 'Could not create logs directory...'
-        exit(1)
+'''
+graceid = opts.graceid
+try:
+    os.system('mkdir -p ' + log_path)
+except:
+    print 'Could not create logs directory...'
+    exit(1)
 
-    logFileName = log_path + '/log_' + graceid + '.txt'
-    log = open(logFileName, 'a')
-    log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
-    try:
-        os.system('mkdir -p ' + coinc_path)
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created coinc directory\n')
+logFileName = log_path + '/log_' + graceid + '.txt'
+log = open(logFileName, 'a')
+log.writelines('\n' + str(datetime.datetime.today()) + '\t' + 'Analyzing event: ' + graceid + '\n')
+try:
+    os.system('mkdir -p ' + coinc_path)
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created coinc directory\n')
 
-        os.system('mkdir -p ' + psd_path)
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created psd directory\n')
+    os.system('mkdir -p ' + psd_path)
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created psd directory\n')
 
-        os.system('mkdir -p ' + source_class_path)
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created results directory\n')
+    os.system('mkdir -p ' + source_class_path)
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully created results directory\n')
 
-    except:
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Failed to creat coinc and/or psd and/or results directory, Check write privilege to the given path\n')
-        exit(1)
+except:
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Failed to creat coinc and/or psd and/or results directory, Check write privilege to the given path\n')
+    exit(1)
 
-    for countTrials in xrange(numTrials): ### iterate a maximum of numTrials times
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
-        if getCoinc(graceid, gracedb_url, coinc_path, psd_path): ### this failed, so we sleep
-            Time.sleep(wait)
-        else: ### success! so we exit the loop
-            break
-    else: ### we did not break from the loop, so we must have timed out
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
-        exit(1)
+for countTrials in xrange(numTrials): ### iterate a maximum of numTrials times
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Fetching coinc and psd file. Trial number: ' +  str(countTrials+1) + '\n')
+    if getCoinc(graceid, gracedb_url, coinc_path, psd_path): ### this failed, so we sleep
+        Time.sleep(wait)
+    else: ### success! so we exit the loop
+        break
+else: ### we did not break from the loop, so we must have timed out
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Could not fetch coinc and/or psd files\n')
+    exit(1)
 
-    log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
-
-
-
-    start = Time.time()
-    coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
-    [mass1, mass2, chi1, snr, ifo] = readCoinc(coincFileName)
-
-    if write_text: ### Write the masses, spin and highest SNR in a text file in the all_coinc directory
-        File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
-        File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
-        File.close()
-
-    samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifo + '=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
-    log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
-
-    ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
-    if ~np.any( np.isnan(samples_sngl[0]) ):
-        diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', remMassThreshold)
-        [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
-        #em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
-        em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb() # RE: Probability using new EM bright boundary
-	#NS_prob_1_sngl, NS_prob_2_sngl, em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb()
-
-    else:
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Return was NaNs\n')
-        [NS_prob_2_sngl, em_bright_prob_sngl] = [0., 0.]
-        message = 'EM-Bright probabilities computation failed for trigger + ' + graceid + '\n'
-        if gdbwrite: ### Write to graceDB only if gdbwrite flag is True.
-            gdb.writeLog(graceid, message, tagname='em_follow')
-        end = Time.time()
-        log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
-        exit(0)
+log.writelines(str(datetime.datetime.today()) + '\t' + 'Successfully fetched coinc and/or psd files\n')
 
 
+
+start = Time.time()
+coincFileName = [coinc_path + '/coinc_' + graceid + '.xml']
+[mass1, mass2, chi1, snr, ifo] = readCoinc(coincFileName)
+
+if write_text: ### Write the masses, spin and highest SNR in a text file in the all_coinc directory
+    File = open(coinc_path + '/masses_chi1_' + graceid + '_.dat', 'w')
+    File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
+    File.close()
+
+samples_sngl = getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifo + '=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
+log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
+
+### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
+if ~np.any( np.isnan(samples_sngl[0]) ):
+    diskMassObject_sngl = genDiskMassProbability.genDiskMass(samples_sngl, 'test', remMassThreshold)
+    [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
+    #em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
+    em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb() # RE: Probability using new EM bright boundary
+#NS_prob_1_sngl, NS_prob_2_sngl, em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb()
+
+else:
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Return was NaNs\n')
+    [NS_prob_2_sngl, em_bright_prob_sngl] = [0., 0.]
+    message = 'EM-Bright probabilities computation failed for trigger + ' + graceid + '\n'
+    if gdbwrite: ### Write to graceDB only if gdbwrite flag is True.
+        gdb.writeLog(graceid, message, tagname='em_follow')
     end = Time.time()
     log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
+    exit(0)
 
 
-    ### Find an appropriate use of this file (e.g. uploading this as JSON) else get rid of it ###
+end = Time.time()
+log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
+
+
+### Find an appropriate use of this file (e.g. uploading this as JSON) else get rid of it ###
 #     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
 #     source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
 #     source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(em_bright_prob_sngl) + '% \n')
 
 #     source_classification.close()
 
-    message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
+message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
-    filename = source_class_path + '/Source_Classification_' + graceid + '_.json'
-    file_obj = open(filename, 'w')
-    file_obj.write( json.dumps( {'Prob NS2':NS_prob_2_sngl, 'Prob EMbright':em_bright_prob_sngl} ) )
-    file_obj.close()
+filename = source_class_path + '/Source_Classification_' + graceid + '_.json'
+file_obj = open(filename, 'w')
+file_obj.write( json.dumps( {'Prob NS2':NS_prob_2_sngl, 'Prob EMbright':em_bright_prob_sngl} ) )
+file_obj.close()
 
-    #gdb.writeLog( graceid, message, filename=filename, tagname=tagnames )
-    if gdbwrite:
-        gdb.writeLog(graceid, message, tagname=tagnames)
+#gdb.writeLog( graceid, message, filename=filename, tagname=tagnames )
+if gdbwrite:
+    gdb.writeLog(graceid, message, tagname=tagnames)
 
