@@ -284,7 +284,7 @@ def load_ns_sequence(eos_name):
 
     if eos_name == '2H':
 
-	ns_sequence_path = os.path.join('/home/deep.chatterjee/LIGOProject/INJECTIONs', 'equil_2H.dat')
+	ns_sequence_path = os.path.join('/home/shaon/analysis/o2/EMBright/temp/EM_Bright/etc/', 'equil_2H.dat')
         ns_sequence = np.loadtxt(ns_sequence_path)
     else:
         print 'Only the 2H EOS is currently supported!'
