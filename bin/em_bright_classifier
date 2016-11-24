@@ -115,8 +115,7 @@ forced = configParser.getboolean('EMBright', 'Forced')
 gdbwrite = configParser.getboolean('gracedb', 'gdbwrite')
 write_text = configParser.getboolean('EMBright', 'writeText')
 f_low = float( configParser.get('EMBright', 'fmin') )
-mass1_cut = float( configParser.get('EMBright', 'mass1_cut') )
-chi1_cut = float( configParser.get('EMBright', 'chi1_cut') )
+mc_cut = float( configParser.get('EMBright', 'chirpmass_cut') )
 lowMass_approx = configParser.get('EMBright', 'lowMass_approx')
 highMass_approx = configParser.get('EMBright', 'highMass_approx')
 tagnames = configParser.get('gracedb', 'tagnames').split()
@@ -187,7 +186,7 @@ if write_text: ### Write the masses, spin and highest SNR in a text file in the 
     File.writelines(graceid + '\t' + str(mass1) + '\t' +  str(mass2) + '\t' + str(chi1) + '\t' + str(snr) + '\n')
     File.close()
 
-samples_sngl = getEllipsoidSamples.getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifo + '=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mass1_cut=mass1_cut, chi1_cut=chi1_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
+samples_sngl = getEllipsoidSamples.getSamples(graceid, mass1, mass2, chi1, snr, ellipsoidSample, {ifo + '=' + psd_path + '/psd_' + graceid + '.xml.gz'}, fmin=f_low, NMcs=10, NEtas=10, NChis=10, mc_cut=mc_cut, lowMass_approx=lowMass_approx, highMass_approx=highMass_approx, Forced=forced, logFile=logFileName, saveData=True)
 log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellipsoid samples\n')
 
 ### Currently NaNs are generated when the ellipsoid generation failed. This will be changed in subsequent version. ###
@@ -197,30 +196,20 @@ if ~np.any( np.isnan(samples_sngl[0]) ):
     #em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
     em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb() # RE: Probability using new EM bright boundary
 #NS_prob_1_sngl, NS_prob_2_sngl, em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb()
+    message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n  The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
 else:
-    log.writelines(str(datetime.datetime.today()) + '\t' + 'Return was NaNs\n')
-    [NS_prob_2_sngl, em_bright_prob_sngl] = [0., 0.]
-    message = 'EM-Bright probabilities computation failed for trigger + ' + graceid + '\n'
-    if gdbwrite: ### Write to graceDB only if gdbwrite flag is True.
-        gdb.writeLog(graceid, message, tagname='em_follow')
-    end = Time.time()
-    log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
-    exit(0)
-
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Ellipsoid generation failed. Computing probabilities from trigger point estimates. \n')
+    mchirp = ((mass1 * mass2)**(3./5.))/((mass1 + mass2)**(1./5.))
+    eta = (mass1 * mass2)/((mass1 + mass2)**2)
+    point_etimate = np.array([[ mchirp, eta, chi1]])
+    diskMassObject_sngl = genDiskMassProbability.genDiskMass(point_etimate, 'test', remMassThreshold)
+    [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
+    em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb() # RE: Using same function as in if block above
+    message = 'Ellipsoid generation code failed. Computing EM-Bright probabilities from triggered point estimates: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n  The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
 end = Time.time()
 log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
-
-
-### Find an appropriate use of this file (e.g. uploading this as JSON) else get rid of it ###
-#     source_classification = open(source_class_path + '/Source_Classification_' + graceid + '_.dat', 'w')
-#     source_classification.writelines('The probability of second object being a neutron star for the trigger ' + graceid + ' = ' + str(NS_prob_2_sngl) + '% \n')
-#     source_classification.writelines('The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun for the trigger ' + graceid + ' = '  + str(em_bright_prob_sngl) + '% \n')
-
-#     source_classification.close()
-
-message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
 filename = source_class_path + '/Source_Classification_' + graceid + '_.json'
 file_obj = open(filename, 'w')

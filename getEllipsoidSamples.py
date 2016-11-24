@@ -37,18 +37,13 @@ samples = getSamples('TEST', 10.0, 1.4, -0.5, 12.0, 1000, {'H1=../psds_2016.xml.
 
 
 
-def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, NMcs=5, NEtas=5, NChis=5, mass1_cut=5.0, chi1_cut=0.05, lowMass_approx='lalsim.SpinTaylorT4', highMass_approx='lalsim.IMRPhenomPv2', Forced=False, logFile=False, saveData=False, plot=False, path=False, show=False):
+def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, NMcs=5, NEtas=5, NChis=5, mc_cut=1.741, lowMass_approx='lalsim.SpinTaylorT4', highMass_approx='lalsim.IMRPhenomPv2', Forced=False, logFile=False, saveData=False, plot=False, path=False, show=False):
     m1_SI = mass1 * lal.MSUN_SI
     m2_SI = mass2 * lal.MSUN_SI
 #     min_mc_factor, max_mc_factor = 0.9, 1.1
     min_mc_factor, max_mc_factor = 0.98, 1.02
     min_eta, max_eta = 0.05, 0.25
     min_chi1, max_chi1 = -0.99, 0.99
-
-    # Control evaluation of the effective Fisher grid
-#     NMcs = 10
-#     NEtas = 10
-#     NChis = 10
 
     # match_cntr = 0.9 # Fill an ellipsoid of match = 0.9
     bank_min_match = 0.97
@@ -73,7 +68,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, 
     if logFile:
         log = open(logFile, 'a') ### Generate log file
 
-    if Forced + (mass1 > mass1_cut) * (chi1 > chi1_cut): ## If forced to use the IMR waveform, or if the mass2 and spin1z values are above the cut.
+    if Forced + (lsu.mchirp(mass1, mass2) > mc_cut): ## If forced to use the IMR waveform, or if the chirp mass value is above the cut.
         if logFile:
 	    log.writelines( str(datetime.datetime.today()) + '\t' + 'Using IMRPhenomPv2 approximation.' + '\n')
 	else:
@@ -128,7 +123,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, 
             psd = series.read_psd_xmldoc(xmldoc, root_name=None)[inst]
             psd_f_high = len(psd.data.data)*psd.deltaF
             f = np.arange(0, psd_f_high, psd.deltaF)
-            fvals = np.arange(0, psd_f_high, PSIG.deltaF)            
+            fvals = np.arange(0, psd_f_high, PSIG.deltaF)
             eff_fisher_psd = np.interp(fvals, f, psd.data.data)
 
     analyticPSD_Q = False
@@ -184,7 +179,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, 
     start = time.time()
     match_cntrs = np.array([0.97, 0.98, 0.99])
     while np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
-        if count>0: 
+        if count>0:
             if logFile:
                 log.writelines( str(datetime.datetime.today()) + '\t' + 'At least one of the eval is negative: switching to match of ' + str(match_cntrs[count]) + '\n' )
             else:
@@ -196,7 +191,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, 
             fitgamma = eff.effectiveFisher(eff.residuals3d, rhos[cut], dMcFLAT_MSUN[cut], detaFLAT[cut], dchiFLAT[cut])
             # Find the eigenvalues/vectors of the effective Fisher matrix
             gam = eff.array_to_symmetric_matrix(fitgamma)
-            gam = gam + gam_prior 
+            gam = gam + gam_prior
             evals, evecs, rot = eff.eigensystem(gam)
             count += 1
             if (count >= 3) and np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):

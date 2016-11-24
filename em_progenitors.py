@@ -284,7 +284,8 @@ def load_ns_sequence(eos_name):
 
     if eos_name == '2H':
 
-	ns_sequence_path = os.path.join('/home/shaon/analysis/o2/EMBright/temp/EM_Bright/etc/', 'equil_2H.dat')
+	#ns_sequence_path = os.path.join('/home/shaon/analysis/o2/EMBright/temp/EM_Bright/etc/', 'equil_2H.dat') ### To run on UWM cluster
+        ns_sequence_path = os.path.join('/home/gracedb.processor/users/shaon/working/EM_Bright/etc/', 'equil_2H.dat') ### To run on gracedb.processor
         ns_sequence = np.loadtxt(ns_sequence_path)
     else:
         print 'Only the 2H EOS is currently supported!'
