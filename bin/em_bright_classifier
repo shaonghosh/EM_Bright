@@ -63,10 +63,6 @@ def readCoinc(CoincFile):
 parser = optparse.OptionParser()
 parser.add_option("-G", "--graceid",action="store",type="string", metavar=" NAME", help="The GraceDB ID of the event on which the EM-Bright codes need to be run.")
 parser.add_option("-C", "--configfile",action="store",type="string", metavar=" NAME", help="The name of the config file")
-parser.add_option("-P", "--psd",action="store",type="string", metavar=" NAME", help="The name of the psd file (if --graceid was not given)")
-parser.add_option("-m", "--mass1",action="store",type="float", metavar=" NAME", help="value of mass1")
-parser.add_option("-n", "--mass2",action="store",type="float", metavar=" NAME", help="value of mass2")
-parser.add_option("-c", "--chi1",action="store",type="float", metavar=" NAME", help="value of chi1")
 
 (opts,args) = parser.parse_args()
 
@@ -76,27 +72,9 @@ parser.add_option("-c", "--chi1",action="store",type="float", metavar=" NAME", h
 if not opts.configfile:
     print 'Must provide config file...'
     exit(1)
-
-if not opts.graceid:
-    if not opts.psd:
-        print 'Must provide psd file...'
-        exit(1)
-    if not opts.mass1:
-        print 'Must provide mass 1'
-        exit(1)
-    if not opts.mass2:
-        print 'Must provide mass 2'
-    if not opts.chi1:
-        print 'Must provide chi 1'
-        exit(1)
-
-else:
-    if (opts.psd or opts.mass1 or opts.mass2 or opts.chi1):
-        print 'Can not provide parameter option along with grace ID.'
-        exit(1)
-
-
-
+if not opts.configfile:
+    print 'Must provide graceID of the trigger...'
+    exit(1)
 
 ### Reading information from config file ###
 configParser = ConfigParser.ConfigParser()
@@ -196,6 +174,8 @@ if ~np.any( np.isnan(samples_sngl[0]) ):
     #em_bright_prob_sngl = np.sum((diskMass_sngl > 0.)*100./len(diskMass_sngl))
     em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb() # RE: Probability using new EM bright boundary
 #NS_prob_1_sngl, NS_prob_2_sngl, em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb()
+    NS_prob_2_sngl = np.round(NS_prob_2_sngl, 0)
+    em_bright_prob_sngl = np.round(em_bright_prob_sngl, 0)
     message = 'EM-Bright probabilities computed from detection pipeline: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n  The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
 else:
@@ -206,6 +186,8 @@ else:
     diskMassObject_sngl = genDiskMassProbability.genDiskMass(point_etimate, 'test', remMassThreshold)
     [NS_prob_1_sngl, NS_prob_2_sngl, diskMass_sngl] = diskMassObject_sngl.fromEllipsoidSample()
     em_bright_prob_sngl = diskMassObject_sngl.computeEMBrightProb() # RE: Using same function as in if block above
+    NS_prob_2_sngl = np.round(NS_prob_2_sngl, 0)
+    em_bright_prob_sngl = np.round(em_bright_prob_sngl, 0)
     message = 'Ellipsoid generation code failed. Computing EM-Bright probabilities from triggered point estimates: The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n  The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
 end = Time.time()
