@@ -195,10 +195,10 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, 
             evals, evecs, rot = eff.eigensystem(gam)
             count += 1
             if (count >= 3) and np.any( np.array( [np.real(evals[0]), np.real(evals[1]), np.real(evals[2])] ) < 0 ):
-                return adapt_failure(logFile)
+                return adapt_failure(logFile, log)
                 sys.exit()
         else:
-            return adapt_failure(logFile)
+            return adapt_failure(logFile, log)
             sys.exit()
 
     #
@@ -329,7 +329,7 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, 
 
 
 
-def adapt_failure(logFile):
+def adapt_failure(logFile, log):
     if logFile:
         log.writelines( str(datetime.datetime.today()) + '\t' + 'Could not find an all positive set Evals in three attempts... Quitting program' + '\n')
     else:

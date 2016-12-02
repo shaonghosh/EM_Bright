@@ -197,7 +197,7 @@ def find_effective_Fisher_region(P, IP, target_match, param_names,param_bounds):
     region where target_match is achieved. Therefore, allow a generous
     safety factor in your value of 'target_match'.
     """
-    TOL = 1.e-3 # Don't need to be very precise for this...
+    TOL = 1.e-6 # Don't need to be very precise for this...
     Nparams = len(param_names)
     assert len(param_bounds) == Nparams
     param_cube = []
