@@ -1,0 +1,14 @@
+universe            = local
+executable          = /home/gracedb.processor/working/G/273000/G273937/embright_driver.sh
+arguments           = " /home/gracedb.processor/opt/etc/emBright.ini G273937 "
+getenv              = True
+notification        = never
+accounting_group = ligo.prod.o2.cbc.grb.raven
+accounting_group_user = shaon.ghosh
+
+output              = /home/gracedb.processor/working/G/273000/G273937/em_bright_G273937.out
+error               = /home/gracedb.processor/working/G/273000/G273937/em_bright_G273937.error
+
++LVAlertListen      = G273937_em_bright
+
+Queue
