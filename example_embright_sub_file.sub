@@ -1,5 +1,5 @@
 universe            = local
-executable          = /home/gracedb.processor/working/G/273000/G273937/embright_driver.sh
+executable          = /home/gracedb.processor/opt/bin/embright_driver.sh
 arguments           = " /home/gracedb.processor/opt/etc/emBright.ini G273937 "
 getenv              = True
 notification        = never
