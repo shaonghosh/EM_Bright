@@ -229,7 +229,7 @@ NS_prob_2_sngl      = np.round(NS_prob_2_sngl, 0)
 em_bright_prob_sngl = np.round(em_bright_prob_sngl, 0)
 
 ### format message for GraceDb
-message += "The probability of second object's mass being less than 3.0 M_sun  = " + str(NS_prob_2_sngl) + "% \n  The probability of remnant mass outside the black hole in excess of " + str(remMassThreshold) + " M_sun = "  + str(em_bright_prob_sngl) + '% \n"
+message += "The probability of second object's mass being less than 3.0 M_sun  = " + str(NS_prob_2_sngl) + "%. The probability of remnant mass outside the black hole in excess of " + str(remMassThreshold) + " M_sun = "  + str(em_bright_prob_sngl) + "%."
 
 end = Time.time()
 log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
