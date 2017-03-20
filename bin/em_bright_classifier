@@ -229,7 +229,7 @@ NS_prob_2_sngl      = np.round(NS_prob_2_sngl, 0)
 em_bright_prob_sngl = np.round(em_bright_prob_sngl, 0)
 
 ### format message for GraceDb
-message += 'The probability of second object being a neutron star  = ' + str(NS_prob_2_sngl) + '% \n  The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
+message += 'The probability of second object mass being less than 3.0 M_sun  = ' + str(NS_prob_2_sngl) + '% \n  The probability of remnant mass outside the black hole in excess of ' + str(remMassThreshold) + ' M_sun = '  + str(em_bright_prob_sngl) + '% \n'
 
 end = Time.time()
 log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
@@ -237,7 +237,7 @@ log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing 
 ### save output
 filename = os.path.join(source_class_path, 'Source_Classification_' + opts.graceid + '.json')
 file_obj = open(filename, 'w')
-file_obj.write( json.dumps( {'Prob NS2':NS_prob_2_sngl, 'Prob EMbright':em_bright_prob_sngl} ) )
+file_obj.write( json.dumps( {'Prob Mass2_less_than 3M_sun':NS_prob_2_sngl, 'Prob remnant_mass_greater_than 0M_sun':em_bright_prob_sngl} ) )
 file_obj.close()
 
 ### upload to GraceDb
