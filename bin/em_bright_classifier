@@ -194,7 +194,7 @@ log.writelines(str(datetime.datetime.today()) + '\t' + 'Created ambiguity ellips
 if np.any( np.isnan(samples_sngl[0]) ): ### there were NANs, so we set up point estimate as samples_sngl
 
     ### report that this failed
-    log.writelines(str(datetime.datetime.today()) + '\t' + 'Ellipsoid generation failed. Computing probabilities from trigger point estimates. \n')
+    log.writelines(str(datetime.datetime.today()) + '\t' + 'Ellipsoid generation failed. Computing Source-classification probabilities from trigger point estimates. \n')
 
     ### set up the "samples" as a single point estimate
     mchirp = ((mass1 * mass2)**(3./5.))/((mass1 + mass2)**(1./5.))
@@ -208,11 +208,11 @@ if np.any( np.isnan(samples_sngl[0]) ): ### there were NANs, so we set up point 
         tagnames.remove("lvem")
 
     ### begin message for GraceDb specifying how samples were generated
-    message = 'Ellipsoid generation code failed. Computing EM-Bright probabilities from triggered point estimates: '
+    message = 'Ellipsoid generation code failed. Computing Source-classification probabilities from triggered point estimates: '
 
 else:
     ### begin message for GraceDb specifying how samples were generated
-    message = 'EM-Bright probabilities computed from detection pipeline: '
+    message = 'Source-classification probabilities computed from detection pipeline: '
 
 #########################
 ### compute probabilities
@@ -232,7 +232,7 @@ em_bright_prob_sngl = np.round(em_bright_prob_sngl, 0)
 message += "The probability of second object's mass being less than 3.0 M_sun  = " + str(NS_prob_2_sngl) + "%. The probability of remnant mass outside the black hole in excess of " + str(remMassThreshold) + " M_sun = "  + str(em_bright_prob_sngl) + "%."
 
 end = Time.time()
-log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing EM-Bright probabilities = ' + str(end - start) + '\n')
+log.writelines(str(datetime.datetime.today()) + '\t' + 'Time taken in computing Source-classification probabilities = ' + str(end - start) + '\n')
 
 ### save output
 filename = os.path.join(source_class_path, 'Source_Classification_' + opts.graceid + '.json')
