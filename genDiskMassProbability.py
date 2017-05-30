@@ -48,9 +48,9 @@ class genDiskMass:
         Use this if the saveData argument was used in calling of the getSamples function.
         '''
         data = np.loadtxt(self.inputFile)
-        mc = data[:,1]
-        self.eta = data[:,2]
-        self.chi = data[:,3]
+        mc = data[:,0]
+        self.eta = data[:,1]
+        self.chi = data[:,2]
         self.mPrimary = 0.5*mc*(self.eta**(-3./5.))*(1 + np.sqrt(1 - 4*self.eta))
         self.mSecondary = 0.5*mc*(self.eta**(-3./5.))*(1 - np.sqrt(1 - 4*self.eta))
         NS_prob_2 = np.sum(self.mSecondary < self.max_ns_g_mass)*100./len(self.mSecondary)
