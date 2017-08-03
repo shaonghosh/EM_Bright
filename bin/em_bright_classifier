@@ -5,6 +5,18 @@ import sys
 from sys import stdin
 from sys import exit
 
+### modifying sys.path to source the correct EM-Bright installation on CIT ###
+pathExists1 = os.path.exists('/home/shaon/local/Master_Head_11th_Aug_2016/lal/lib64/python2.7/site-packages')
+pathExists2 = os.path.exists('/home/gracedb.processor/users/shaon')
+
+if pathExists1 * pathExists2:
+        print 'Changing environment for EM-Bright...'
+        prepend = ['/home/shaon/local/Master_Head_11th_Aug_2016/lal/lib64/python2.7/site-packages',
+                  '/home/shaon/local/Master_Head_11th_Aug_2016/lal/lib/python2.7/site-packages',
+                  '/home/gracedb.processor/users/shaon']
+        sys.path[:0] = prepend
+######################################################################
+
 import time as Time
 import datetime
 
