@@ -1,3 +1,4 @@
 #!/bin/bash
-. ~cbc/pe/local/etc/lalinference-user-env.sh
-/home/gracedb.processor/opt/bin/em_bright_classifier --configfile $2 --graceid $4
+source /home/shaon/.profile
+source /home/gracedb.processor/users/shaon/setup.sh
+/home/gracedb.processor/users/shaon/EM_Bright/bin/em_bright_classifier --configfile $2 --graceid $4
