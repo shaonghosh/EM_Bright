@@ -16,8 +16,10 @@
 
 from __future__ import division
 import math
-import numpy as np
 import os.path
+from pkg_resources import resource_filename
+
+import numpy as np
 import scipy.optimize
 import scipy.interpolate
 #from lal import LAL_PI, LAL_MTSUN_SI
@@ -284,8 +286,7 @@ def load_ns_sequence(eos_name):
 
     if eos_name == '2H':
 
-	#ns_sequence_path = os.path.join('/home/shaon/analysis/o2/EMBright/temp/EM_Bright/etc/', 'equil_2H.dat') ### To run on UWM cluster
-        ns_sequence_path = os.path.join('/home/gracedb.processor/users/shaon/working/EM_Bright/etc/', 'equil_2H.dat') ### To run on gracedb.processor
+        ns_sequence_path = resource_filename('EM_Bright', 'etc/equil_2H.dat')
         ns_sequence = np.loadtxt(ns_sequence_path)
     else:
         print 'Only the 2H EOS is currently supported!'
