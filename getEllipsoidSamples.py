@@ -128,8 +128,9 @@ def getSamples(graceid, mass1, mass2, chi1, network_snr, samples, PSD, fmin=30, 
 
     analyticPSD_Q = False
 
-    freq_upper_bound = np.min( [2000.0, (psd.data.length) * (psd.deltaF) * 0.98])
+    freq_upper_bound = np.min([2000.0, (psd.data.length) * (psd.deltaF) * 0.98])
     print 'freq_upper_bound = ' + str(freq_upper_bound)
+    PSIG.tref = 123456789
     IP = lsu.Overlap(fLow = ip_min_freq, fMax=freq_upper_bound,
         deltaF = PSIG.deltaF,
         psd = eff_fisher_psd,

@@ -23,7 +23,8 @@ import datetime
 import numpy as np
 
 import ligo.gracedb.rest
-from pylal import SnglInspiralUtils
+# from pylal import SnglInspiralUtils
+from lalinference.io import events
 
 from EM_Bright import genDiskMassProbability
 from EM_Bright import getEllipsoidSamples
@@ -58,25 +59,27 @@ def getCoinc(graceid, gracedb_url, coinc_path, psd_path):
     except:
         return 1
 
+
 def readCoinc(CoincFile):
-    '''
-    Reads the coinc file. Finds the highest SNR IFO and returns the point estimates of the same.
-    '''
-    ifo   = []
-    mass1 = []
-    mass2 = []
-    chi1  = []
     snr   = []
-    for row in SnglInspiralUtils.ReadSnglInspiralFromFiles( CoincFile ):
-        ifo.append( row.ifo )
-        mass1.append( row.mass1 )
-        mass2.append( row.mass2 )
-        chi1.append( row.spin1z )
-        snr.append( row.snr )
+    ifo   = []
+    event = events.open(CoincFile)
+    event_values = event.values()[0]
+    nifo = len(event_values.singles)  # number of ifos
+    for ii in range(nifo):
+        snr.append(event_values.singles[ii].snr)
+        ifo.append(event_values.singles[ii].detector)
+    ifo = np.array(ifo)
+    snr = np.array(snr)
+    index = np.argmax(snr)
 
-    index = np.argmax( snr ) ## To return highest SNR IFO point estimates
+    template_args = event_values.template_args
+    m1 = template_args['mass1']
+    m2 = template_args['mass2']
+    chi1 = template_args['spin1z']
 
-    return [mass1[index], mass2[index], chi1[index], snr[index], str(ifo[index])]
+    return [m1, m2, chi1, snr[index], str(ifo[index])]
+
 
 ######### Options to be parsed from the command line ####################################
 
@@ -173,7 +176,7 @@ else:
 start = Time.time()
 
 ### extract point estimates from search
-[mass1, mass2, chi1, snr, ifo] = readCoinc( [os.path.join(coinc_path, "coinc_"+opts.graceid+".xml")] )
+[mass1, mass2, chi1, snr, ifo] = readCoinc(os.path.join(coinc_path, "coinc_"+opts.graceid+".xml"))
 
 if write_text: ### Write the masses, spin and highest SNR in a text file in the all_coinc directory
     File = open( os.path.join(coinc_path,  'masses_chi1_' + opts.graceid + '.dat'), 'w')
